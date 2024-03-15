@@ -7,6 +7,15 @@ bool heating_finished()
     return true;
 }
 
+bool has_reached_final_weight() {
+    return false;
+}
+
+void setTargetWeight(double setPoint)
+{
+    printf("Setting target weight to %f\n", setPoint);
+}
+
 void setTargetTemperature(double setPoint)
 {
     printf("Setting target temperature to %f\n", setPoint);
@@ -81,6 +90,7 @@ void SimplifiedProfileEngine::step()
     case ProfileState::HEATING:
         setTargetTemperature(
             parseProfileTemperature(this->profile->temperature));
+        setTargetWeight(parseProfileWeight(this->profile->finalWeight));
         if (heating_finished())
         {
             this->state = ProfileState::READY;
@@ -142,7 +152,7 @@ ProfileState SimplifiedProfileEngine::transitionStage(size_t target_stage)
 
     if (target_stage == this->currentStageId)
     {
-        printf("Profile End\n");
+        printf("Profile End reached via stage end\n");
         return ProfileState::DONE;
     }
 
@@ -165,6 +175,12 @@ ProfileState SimplifiedProfileEngine::processStageStep()
         return ProfileState::ERROR;
     }
 
+    if (has_reached_final_weight())
+    {
+        printf("Profile End reached via final weight hit\n");
+        return ProfileState::DONE;
+    }
+
     printf("executing stage=%d\n", (short)this->currentStageId);
 
     auto now = std::chrono::high_resolution_clock::now();
@@ -177,6 +193,7 @@ ProfileState SimplifiedProfileEngine::processStageStep()
         saveStageLog(STAGE_ENTRY, profile_time_passed);
     }
 
+    // Ensure the sampler is fed with the right stage
     if (this->sampler.stageId != this->currentStageId)
     {
         this->sampler.load_new_stage(stage, this->currentStageId);

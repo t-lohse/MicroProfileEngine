@@ -24,6 +24,7 @@ const char* profileJson = R"JSON({
         }
     ],
     "temperature": 92.5,
+    "final_weight": 80.0,
     "stages": [
         {
             "name": "stage 1",
@@ -145,7 +146,8 @@ int main(void)
             if (engine.state == ProfileState::BREWING)
                 driver.sensors.piston_position = std::min<double>(driver.sensors.piston_position + 1, 100.0);
         }
-        printf("Profile finished, allocated 0x%02lX bytes(%ld kB) of ram, complete stage logs included\n", generator.memoryUsed, generator.memoryUsed / 1024);
+        printf("Profile execution finished.\n");
+        printf("Profile allocated 0x%02lX bytes(%ld kB) of ram for all %d stages combined\n", generator.memoryUsed, generator.memoryUsed / 1024, maxProfile.stages_len);
     }
     catch (const NoStagesInProfileException *&e)
     {

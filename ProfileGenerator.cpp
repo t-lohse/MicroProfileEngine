@@ -167,7 +167,7 @@ ProfileGenerator::ProfileGenerator(const char *json)
     profile.startTime = 0;
     profile.stages_len = 0;
     profile.temperature = writeProfileTemperature(doc["temperature"].as<double>());
-    profile.finalWeight = writeProfileWeight(doc["finale_weight"].as<double>());
+    profile.finalWeight = writeProfileWeight(doc["final_weight"].as<double>());
     profile.wait_after_heating = doc["wait_after_heating"].as<bool>();
     profile.auto_purge = doc["auto_purge"].as<bool>();
 
@@ -192,7 +192,7 @@ ProfileGenerator::ProfileGenerator(const char *json)
     StageLog *logs = static_cast<StageLog *>(calloc(sizeof(StageLog), num_stages));
     if (logs == nullptr)
         throw new std::length_error("cannot allocate enough memory for all stage logs");
-    this->memoryUsed += sizeof(StageLog) * profile.stages_len;
+    //this->memoryUsed += sizeof(StageLog) * profile.stages_len;
 
     profile.stage_log = logs;
 }
