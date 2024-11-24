@@ -1,5 +1,5 @@
 
-#include "ExitTrigger.h"
+#include "../include/ExitTrigger.h"
 
 static double getExitInput(const ExitTrigger *exit, Driver *driver, long stage_timestamp, long profile_timestamp)
 {
@@ -41,6 +41,9 @@ bool checkExitCondition(const ExitTrigger *exit, Driver *driver, long stage_time
 {
     double current_value = getExitInput(exit, driver, stage_timestamp, profile_timestamp);
     double exit_value = parseExitValue(exit->value);
+
+    printf("Input: %f -- Exit Value: %f\n", current_value, exit_value);
+
 
     // printf("ExitTrigger: Comparing %f and %f == %d\n", current_value, exit_value, current_value <= exit_value);
     switch (exit->comparison)

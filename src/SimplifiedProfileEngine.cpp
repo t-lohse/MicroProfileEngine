@@ -1,6 +1,6 @@
-#include "SimplifiedProfileEngine.h"
+#include "../include/SimplifiedProfileEngine.h"
 
-#include "ExitTrigger.h"
+#include "../include/ExitTrigger.h"
 
 bool heating_finished()
 {
@@ -199,7 +199,11 @@ ProfileState SimplifiedProfileEngine::processStageStep()
         this->sampler.load_new_stage(stage, this->currentStageId);
     }
 
-    auto stage_timestamp = (now - (this->profileStartTimestamp + (log->start.timestamp * std::chrono::milliseconds(1)))) / std::chrono::milliseconds(1);
+    auto stage_timestamp = (now -
+            (this->profileStartTimestamp +
+                (log->start.timestamp * std::chrono::milliseconds(1))
+            )
+         ) / std::chrono::milliseconds(1);
 
     for (size_t i = 0; i < stage->exitTrigger_len; i++)
     {
@@ -208,6 +212,10 @@ ProfileState SimplifiedProfileEngine::processStageStep()
         if (should_exit)
         {
             printf("Exit trigger activated!\n");
+            printf("________________________________________________________________\n");
+            printf("current stage_id: %zu, target_stage: %d\n", this->currentStageId, trigger->target_stage);
+            printf("________________________________________________________________\n");
+
             return this->transitionStage(trigger->target_stage);
         }
     }

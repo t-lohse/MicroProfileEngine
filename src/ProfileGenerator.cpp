@@ -1,4 +1,5 @@
-#include "ProfileGenerator.h"
+#include "../include/ProfileGenerator.h"
+#include <iostream>
 struct InvalidJson : std::runtime_error
 {
     using std::runtime_error::runtime_error;
@@ -169,7 +170,11 @@ ProfileGenerator::ProfileGenerator(const char *json)
     profile.temperature = writeProfileTemperature(doc["temperature"].as<double>());
     profile.finalWeight = writeProfileWeight(doc["final_weight"].as<double>());
     profile.wait_after_heating = doc["wait_after_heating"].as<bool>();
+
+    std::cout << profile.wait_after_heating << std::endl;
     profile.auto_purge = doc["auto_purge"].as<bool>();
+
+    std::cout << profile.auto_purge << std::endl;
 
     JsonArray json_stages = doc["stages"].as<JsonArray>();
     auto num_stages = std::min(json_stages.size(), static_cast<size_t>(MAX_STAGES));

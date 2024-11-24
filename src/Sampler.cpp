@@ -1,4 +1,4 @@
-#include "Sampler.h"
+#include "../include/Sampler.h"
 
 SamplerPoint::SamplerPoint(ControlType type, Point point, long unit_conversion_factor)
 {
@@ -25,6 +25,8 @@ double Sampler::get(long current_reference_input)
 {
     SamplerPoint first_point = this->points.front();
     SamplerPoint last_point = this->points.back();
+
+    printf("%ld - %f %f\n", current_reference_input, last_point.x, last_point.y);
 
     if (this->points.size() == 1)
         return this->points[0].y;
@@ -65,7 +67,7 @@ void Sampler::load_new_stage(const Stage *stage, int16_t stageId)
            stageId,
            points.size());
 
-    this->load_new_points(type, points, unit_conversion_factor, interpolation);
+this->load_new_points(type, points, unit_conversion_factor, interpolation);
 
     for (SamplerPoint point : this->points) {
         printf("SamplerPoint: (%f:%f)\n", point.x, point.y);

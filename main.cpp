@@ -1,10 +1,12 @@
-#include "ProfileDefinition.h"
-#include "SimplifiedProfileEngine.h"
-#include "ProfileGenerator.h"
+#include "include/ProfileDefinition.h"
+#include "include/SimplifiedProfileEngine.h"
+#include "include/ProfileGenerator.h"
 
 #include <chrono>
 #include <thread>
 #include <algorithm>
+#include <gsl/gsl>
+#include "iostream"
 
 const char* profileJson = R"JSON({
     "name": "E61 with dropping pressure",
@@ -123,6 +125,12 @@ int main(void)
     // trigger->type = ExitType::EXIT_TIME;
     // trigger->target_stage = 1;
     // trigger->value = writeExitValue(2.0);
+
+    //gsl::not_null<*int> ptr{};
+    int *ip = new int{8};
+    std::cout << *ip << std::endl;
+    gsl::not_null<int*> ptr = new int{20};
+    std::cout << *ptr << std::endl;
 
     ProfileGenerator generator(profileJson);
     Profile maxProfile = generator.profile;
