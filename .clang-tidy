@@ -1,0 +1,15 @@
+Checks: >
+  -*,
+  cppcoreguidelines-*,
+  clang-analyzer-*
+#WarningsAsErrors: '*'
+HeaderFilterRegex: '.*'
+#AnalyzeTemporaryDtors: true
+FormatStyle: none
+
+#-*,
+#cppcoreguidelines-*,
+#bugprone-*,
+#performance-*,
+#readability-*,
+#clang-analyzer-*,

@@ -1,11 +1,10 @@
-#include "../include/ProfileGenerator.h"
-#include <iostream>
+#include "ProfileGenerator.hpp"
 struct InvalidJson : std::runtime_error
 {
     using std::runtime_error::runtime_error;
 };
 
-static ControlType parseControlType(const std::string &type)
+static ControlType parseControlType(const std::string& type)
 {
     if (type == "pressure")
         return ControlType::CONTROL_PRESSURE;
@@ -18,7 +17,7 @@ static ControlType parseControlType(const std::string &type)
     throw new InvalidJson(type);
 }
 
-static InputType parseInputType(const std::string &type)
+static InputType parseInputType(const std::string& type)
 {
     if (type == "time")
         return InputType::INPUT_TIME;
@@ -29,7 +28,7 @@ static InputType parseInputType(const std::string &type)
     throw new InvalidJson(type);
 }
 
-static InterpolationType parseInterpolationType(const std::string &type)
+static InterpolationType parseInterpolationType(const std::string& type)
 {
     if (type == "linear")
         return InterpolationType::INTERPOLATION_LINEAR;
@@ -40,7 +39,7 @@ static InterpolationType parseInterpolationType(const std::string &type)
     throw new InvalidJson(type);
 }
 
-static ExitType parseExitType(const std::string &type)
+static ExitType parseExitType(const std::string& type)
 {
     if (type == "pressure")
         return ExitType::EXIT_PRESSURE;
@@ -61,7 +60,7 @@ static ExitType parseExitType(const std::string &type)
     throw new InvalidJson(type);
 }
 
-static ExitComparison parseExitComparison(const std::string &comparison)
+static ExitComparison parseExitComparison(const std::string& comparison)
 {
     if (comparison == "smaller")
         return ExitComparison::EXIT_COMP_SMALLER;
@@ -75,35 +74,28 @@ static ExitReferenceType parseExitReferenceType(bool is_relative)
     return is_relative ? ExitReferenceType::EXIT_REF_SELF : ExitReferenceType::EXIT_REF_ABSOLUTE;
 }
 
-static size_t
-parseStage(const JsonObject &stageJson, Stage &stage, int16_t default_stage_exit)
+static size_t parseStage(const JsonObject& stageJson, Stage& stage, int16_t default_stage_exit)
 {
     size_t bytes_allocated = 0;
 
     stage.dynamics.controlSelect = parseControlType(stageJson["type"].as<std::string>());
 
     // Allocate memory for points and parse them
-    if (stageJson.containsKey("exit_triggers"))
-    {
-
+    if (stageJson.containsKey("exit_triggers")) {
         JsonArray jsonPoints = stageJson["dynamics"]["points"].as<JsonArray>();
         auto num_points = std::min(jsonPoints.size(), static_cast<size_t>(100));
-        Point *points = static_cast<Point *>(calloc(sizeof(Point), num_points));
+        Point* points = static_cast<Point*>(calloc(sizeof(Point), num_points));
         if (points == nullptr)
             throw new std::length_error("cannot allocate enough memory for all stages");
 
         bytes_allocated += sizeof(Point) * num_points;
         stage.dynamics.points = points;
         stage.dynamics.points_len = num_points;
-        for (size_t i = 0; i < stage.dynamics.points_len; ++i)
-        {
+        for (size_t i = 0; i < stage.dynamics.points_len; ++i) {
             bool is_percent = stage.dynamics.controlSelect == ControlType::CONTROL_POWER ||
                               stage.dynamics.controlSelect == ControlType::CONTROL_PISTON_POSITION;
-            stage.dynamics.points[i].x =
-                static_cast<int16_t>(jsonPoints[i][0].as<float>() * 10.0f);
-            stage.dynamics.points[i].y.val =
-                static_cast<int16_t>(
-                    jsonPoints[i][1].as<float>() * (is_percent ? 1 : 10));
+            stage.dynamics.points[i].x = static_cast<int16_t>(jsonPoints[i][0].as<float>() * 10.0f);
+            stage.dynamics.points[i].y.val = static_cast<int16_t>(jsonPoints[i][1].as<float>() * (is_percent ? 1 : 10));
         }
     }
 
@@ -111,12 +103,11 @@ parseStage(const JsonObject &stageJson, Stage &stage, int16_t default_stage_exit
     stage.dynamics.inputSelect = parseInputType(stageJson["dynamics"]["over"].as<std::string>());
 
     // Allocate memory for the exit triggers
-    if (stageJson.containsKey("exit_triggers"))
-    {
+    if (stageJson.containsKey("exit_triggers")) {
         JsonArray jsonExitTriggers = stageJson["exit_triggers"].as<JsonArray>();
 
         auto num_exit_triggers = std::min(jsonExitTriggers.size(), static_cast<size_t>(100));
-        ExitTrigger *exitTriggers = static_cast<ExitTrigger *>(calloc(sizeof(ExitTrigger), num_exit_triggers));
+        ExitTrigger* exitTriggers = static_cast<ExitTrigger*>(calloc(sizeof(ExitTrigger), num_exit_triggers));
         if (exitTriggers == nullptr)
             throw new std::length_error("cannot allocate enough memory for all stages");
 
@@ -124,8 +115,7 @@ parseStage(const JsonObject &stageJson, Stage &stage, int16_t default_stage_exit
 
         stage.exitTrigger = exitTriggers;
         stage.exitTrigger_len = num_exit_triggers;
-        for (size_t i = 0; i < stage.exitTrigger_len; ++i)
-        {
+        for (size_t i = 0; i < stage.exitTrigger_len; ++i) {
             JsonObject exitTriggerJson = jsonExitTriggers[i].as<JsonObject>();
             stage.exitTrigger[i].type = parseExitType(exitTriggerJson["type"].as<std::string>());
             stage.exitTrigger[i].value = writeExitValue(exitTriggerJson["value"].as<double>());
@@ -135,24 +125,17 @@ parseStage(const JsonObject &stageJson, Stage &stage, int16_t default_stage_exit
         }
     }
 
-    if (stageJson.containsKey("limits"))
-    {
+    if (stageJson.containsKey("limits")) {
         JsonArray limits = stageJson["limits"].as<JsonArray>();
-        for (JsonObject limit : limits)
-        {
+        for (JsonObject limit : limits) {
             auto limit_type = limit["type"].as<std::string>();
-            if (limit_type == "pressure")
-            {
+            if (limit_type == "pressure") {
                 stage.dynamics.limits.pressure = writeProfilePressure(limit["value"].as<double>());
                 continue;
-            }
-            else if (limit_type == "flow")
-            {
+            } else if (limit_type == "flow") {
                 stage.dynamics.limits.pressure = writeProfileFlow(limit["value"].as<double>());
                 continue;
-            }
-            else
-            {
+            } else {
                 throw new InvalidJson(limit_type);
             }
         }
@@ -160,7 +143,7 @@ parseStage(const JsonObject &stageJson, Stage &stage, int16_t default_stage_exit
     return bytes_allocated;
 }
 
-ProfileGenerator::ProfileGenerator(const char *json)
+ProfileGenerator::ProfileGenerator(const char* json)
 {
     JsonDocument doc;
     deserializeJson(doc, json);
@@ -170,34 +153,28 @@ ProfileGenerator::ProfileGenerator(const char *json)
     profile.temperature = writeProfileTemperature(doc["temperature"].as<double>());
     profile.finalWeight = writeProfileWeight(doc["final_weight"].as<double>());
     profile.wait_after_heating = doc["wait_after_heating"].as<bool>();
-
-    std::cout << profile.wait_after_heating << std::endl;
     profile.auto_purge = doc["auto_purge"].as<bool>();
-
-    std::cout << profile.auto_purge << std::endl;
 
     JsonArray json_stages = doc["stages"].as<JsonArray>();
     auto num_stages = std::min(json_stages.size(), static_cast<size_t>(MAX_STAGES));
     printf("Profile stages len= %d\n", profile.stages_len);
 
-    Stage *stages = static_cast<Stage *>(calloc(sizeof(Stage), num_stages));
+    Stage* stages = static_cast<Stage*>(calloc(sizeof(Stage), num_stages));
     if (stages == nullptr)
         throw new std::length_error("cannot allocate enough memory for all stages");
 
     profile.stages = stages;
     profile.stages_len = num_stages;
     this->memoryUsed += sizeof(Stage) * profile.stages_len;
-    for (int i = 0; i < profile.stages_len; ++i)
-    {
+    for (int i = 0; i < profile.stages_len; ++i) {
         JsonObject stageJson = json_stages[i].as<JsonObject>();
-        Stage &stage = profile.stages[i];
-        this->memoryUsed +=
-            parseStage(stageJson, stage, i == (profile.stages_len - 1) ? i : i + 1);
+        Stage& stage = profile.stages[i];
+        this->memoryUsed += parseStage(stageJson, stage, i == (profile.stages_len - 1) ? i : i + 1);
     }
-    StageLog *logs = static_cast<StageLog *>(calloc(sizeof(StageLog), num_stages));
+    StageLog* logs = static_cast<StageLog*>(calloc(sizeof(StageLog), num_stages));
     if (logs == nullptr)
         throw new std::length_error("cannot allocate enough memory for all stage logs");
-    //this->memoryUsed += sizeof(StageLog) * profile.stages_len;
+    // this->memoryUsed += sizeof(StageLog) * profile.stages_len;
 
     profile.stage_log = logs;
 }

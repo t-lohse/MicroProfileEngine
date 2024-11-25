@@ -1,6 +1,7 @@
-#include "include/ProfileDefinition.h"
-#include "include/SimplifiedProfileEngine.h"
-#include "include/ProfileGenerator.h"
+
+#include "ProfileDefinition.hpp"
+#include "SimplifiedProfileEngine.hpp"
+#include "ProfileGenerator.hpp"
 
 #include <chrono>
 #include <thread>
@@ -80,7 +81,7 @@ const char* profileJson = R"JSON({
 })JSON";
 
 
-int main(void)
+int main(int argc, char** argv)
 {
 
     // Profile maxProfile;
@@ -127,14 +128,17 @@ int main(void)
     // trigger->value = writeExitValue(2.0);
 
     //gsl::not_null<*int> ptr{};
-    int *ip = new int{8};
-    std::cout << *ip << std::endl;
-    gsl::not_null<int*> ptr = new int{20};
-    std::cout << *ptr << std::endl;
+    char arggg = argv[1][0];
+    int i = 0;
+    int *ip = &i;
+    std::cout << *ip << '\n';
+    if (arggg == '9')
+        ip = nullptr;
+    std::cout << *ip << '\n';
+
 
     ProfileGenerator generator(profileJson);
     Profile maxProfile = generator.profile;
-
 
     Driver driver;
     SimplifiedProfileEngine engine(&maxProfile, &driver);

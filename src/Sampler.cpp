@@ -1,21 +1,12 @@
-#include "../include/Sampler.h"
+#include "Sampler.hpp"
 
 SamplerPoint::SamplerPoint(ControlType type, Point point, long unit_conversion_factor)
 {
-    switch (type)
-    {
-    case ControlType::CONTROL_PRESSURE:
-        this->y = parseProfilePressure(point.y.pressure);
-        break;
-    case ControlType::CONTROL_FLOW:
-        this->y = parseProfileFlow(point.y.flow);
-        break;
-    case ControlType::CONTROL_POWER:
-        this->y = parseProfilePercent(point.y.power);
-        break;
-    case ControlType::CONTROL_PISTON_POSITION:
-        this->y = parseProfilePercent(point.y.piston_position);
-        break;
+    switch (type) {
+    case ControlType::CONTROL_PRESSURE: this->y = parseProfilePressure(point.y.pressure); break;
+    case ControlType::CONTROL_FLOW: this->y = parseProfileFlow(point.y.flow); break;
+    case ControlType::CONTROL_POWER: this->y = parseProfilePercent(point.y.power); break;
+    case ControlType::CONTROL_PISTON_POSITION: this->y = parseProfilePercent(point.y.piston_position); break;
     }
 
     this->x = point.x / 10.0f * unit_conversion_factor;
@@ -25,8 +16,6 @@ double Sampler::get(long current_reference_input)
 {
     SamplerPoint first_point = this->points.front();
     SamplerPoint last_point = this->points.back();
-
-    printf("%ld - %f %f\n", current_reference_input, last_point.x, last_point.y);
 
     if (this->points.size() == 1)
         return this->points[0].y;
@@ -39,35 +28,27 @@ double Sampler::get(long current_reference_input)
     if (current_reference_input >= last_point.x)
         return last_point.y;
 
-    switch (this->interpolation)
-    {
-    case InterpolationType::INTERPOLATION_LINEAR:
-        return this->get_value_linear(current_reference_input);
-    default:
-        throw new UnknownInterpolationType();
+    switch (this->interpolation) {
+    case InterpolationType::INTERPOLATION_LINEAR: return this->get_value_linear(current_reference_input);
+    default: throw new UnknownInterpolationType();
     }
 }
 
-void Sampler::load_new_stage(const Stage *stage, int16_t stageId)
+void Sampler::load_new_stage(const Stage* stage, int16_t stageId)
 {
     ControlType type = stage->dynamics.controlSelect;
     InterpolationType interpolation = stage->dynamics.interpolation;
     long unit_conversion_factor = stage->dynamics.inputSelect == InputType::INPUT_TIME ? 1000 : 1;
 
-    std::vector<Point> points(
-        stage->dynamics.points,
-        stage->dynamics.points + stage->dynamics.points_len);
-
+    std::vector<Point> points(stage->dynamics.points, stage->dynamics.points + stage->dynamics.points_len);
 
     for (Point point : points) {
         printf("InputPoint: (%f:%f)\n", point.x / 10.0f, point.y.val / 10.0f);
     }
 
-    printf("Loading stage %d with %ld points into the sampler \n",
-           stageId,
-           points.size());
+    printf("Loading stage %d with %ld points into the sampler \n", stageId, points.size());
 
-this->load_new_points(type, points, unit_conversion_factor, interpolation);
+    this->load_new_points(type, points, unit_conversion_factor, interpolation);
 
     for (SamplerPoint point : this->points) {
         printf("SamplerPoint: (%f:%f)\n", point.x, point.y);
@@ -75,17 +56,13 @@ this->load_new_points(type, points, unit_conversion_factor, interpolation);
     this->stageId = stageId;
 }
 
-void Sampler::load_new_points(
-    ControlType current_control,
-    std::vector<Point> &points,
-    long unit_conversion_factor,
-    InterpolationType interpolation)
+void Sampler::load_new_points(ControlType current_control, std::vector<Point>& points, long unit_conversion_factor,
+                              InterpolationType interpolation)
 {
     this->interpolation = interpolation;
     this->time_series_index = 0;
     this->points.clear();
-    for (Point &point : points)
-    {
+    for (Point& point : points) {
         SamplerPoint p(current_control, point, unit_conversion_factor);
         this->points.push_back(p);
     }
@@ -93,25 +70,20 @@ void Sampler::load_new_points(
 
 void Sampler::find_current_segment(long current_value)
 {
-
-    while (current_value > this->current_segment_end)
-    {
+    while (current_value > this->current_segment_end) {
         this->current_segment_start = this->current_segment_end;
         this->time_series_index++;
-        if (static_cast<size_t>(time_series_index) >= this->points.size())
-        {
+        if (static_cast<size_t>(time_series_index) >= this->points.size()) {
             this->current_segment_end = UINT64_MAX;
             return;
         }
         this->current_segment_end = (this->points[this->time_series_index].x);
     }
 
-    while (current_value < this->current_segment_start)
-    {
+    while (current_value < this->current_segment_start) {
         this->current_segment_end = this->current_segment_start;
         this->time_series_index++;
-        if (time_series_index < 0)
-        {
+        if (time_series_index < 0) {
             this->current_segment_start = 0;
             return;
         }

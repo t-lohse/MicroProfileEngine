@@ -17,6 +17,8 @@ FetchContent_MakeAvailable(ArduinoJson)
 #target_link_libraries(simplified_profile_engine ArduinoJson)
 
 # Gather all source files in this directory
+
+include_directories(../include)
 file(GLOB SRC_FILES
         ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp
 )

@@ -19,8 +19,8 @@ public:
     double predictive_temperature;
     double weight;
     bool has_water;
-    double motor_encoder; //DEPRECATED
-    double stable_temperature; //DEPRECATED
+    double motor_encoder;       // DEPRECATED
+    double stable_temperature;  // DEPRECATED
     double temperature_up;
     double temperature_middle_up;
     double temperature_middle_down;
@@ -33,16 +33,11 @@ class Driver
 public:
     Driver(): sensors() {}
 
-    SensorState get_sensor_data() {
-        return sensors;
-    }
+    SensorState get_sensor_data() { return sensors; }
 
-    bool get_button_gesture(std::string source, std::string gesture) {
-        return false;
-    }
+    bool get_button_gesture(std::string source, std::string gesture) { return false; }
 
     SensorState sensors;
-
 };
 
 #endif
