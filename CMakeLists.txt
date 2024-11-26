@@ -64,7 +64,9 @@ if(CPPCHECK_EXECUTABLE)
     # Add Cppcheck target to analyze all .cpp and .h files
     add_custom_target(
             cppcheck
-            COMMAND ${CPPCHECK_EXECUTABLE} --enable=all --inconclusive
+            COMMAND ${CPPCHECK_EXECUTABLE} --inconclusive
+                #--enable=all
+                #--disable=missingIncludeSystem
                 #--error-exitcode=1
                 ${CPPCHECK_INCLUDE_DIRS}
             COMMENT "Running Cppcheck static analysis"

@@ -1,7 +1,8 @@
 
-#include "ProfileDefinition.hpp"
-#include "SimplifiedProfileEngine.hpp"
-#include "ProfileGenerator.hpp"
+//#include "ProfileDefinition.hpp"
+//#include "SimplifiedProfileEngine.hpp"
+//#include "ProfileGenerator.hpp"
+#include "Dynamics.hpp"
 
 #include <chrono>
 #include <thread>
@@ -83,60 +84,7 @@ const char* profileJson = R"JSON({
 
 int main(int argc, char** argv)
 {
-
-    // Profile maxProfile;
-    // maxProfile.stages_len = 2;
-    // maxProfile.temperature = writeProfileTemperature(88.4);
-    // Stage* stage = &maxProfile.stages[0];
-    // stage->dynamics.controlSelect = ControlType::CONTROL_PRESSURE;
-    // stage->dynamics.inputSelect = InputType::INPUT_TIME;
-    // stage->dynamics.interpolation = InterpolationType::INTERPOLATION_LINEAR;
-    // stage->dynamics.points_len = 3;
-    // Point *p1 = &stage->dynamics.points[0];
-    // Point *p2 = &stage->dynamics.points[1];
-    // Point *p3 = &stage->dynamics.points[2];
-
-    // p1->x = 0.1 * 10;
-    // p1->y.pressure = writeProfilePressure(4.0);
-    // p2->x = 0.5 * 10;
-    // p2->y.pressure = writeProfilePressure(1.0);
-    // p3->x = 4.1 * 10;
-    // p3->y.pressure = writeProfilePressure(7.0);
-
-
-    // stage->exitTrigger_len = 1;
-    // ExitTrigger *trigger = &stage->exitTrigger[0];
-    // trigger->comparison = ExitComparison::EXIT_COMP_GREATER;
-    // trigger->type = ExitType::EXIT_TIME;
-    // trigger->target_stage = 1;
-    // trigger->value = writeExitValue(5.0);
-
-    // // Create stage 2
-    // stage = &maxProfile.stages[1];
-    // stage->dynamics.controlSelect = ControlType::CONTROL_PRESSURE;
-    // stage->dynamics.inputSelect = InputType::INPUT_TIME;
-    // stage->dynamics.interpolation = InterpolationType::INTERPOLATION_LINEAR;
-    // stage->dynamics.points_len = 1;
-    // p1 = &stage->dynamics.points[0];
-    // p1->x = 0.5 * 10;
-    // p1->y.pressure = writeProfilePressure(8.0);
-    // stage->exitTrigger_len = 1;
-    // trigger = &stage->exitTrigger[0];
-    // trigger->comparison = ExitComparison::EXIT_COMP_GREATER;
-    // trigger->type = ExitType::EXIT_TIME;
-    // trigger->target_stage = 1;
-    // trigger->value = writeExitValue(2.0);
-
-    //gsl::not_null<*int> ptr{};
-    char arggg = argv[1][0];
-    int i = 0;
-    int *ip = &i;
-    std::cout << *ip << '\n';
-    if (arggg == '9')
-        ip = nullptr;
-    std::cout << *ip << '\n';
-
-
+/*
     ProfileGenerator generator(profileJson);
     Profile maxProfile = generator.profile;
 
@@ -165,4 +113,5 @@ int main(int argc, char** argv)
     {
         printf("No Stages in profile!!!");
     }
+    */
 }
