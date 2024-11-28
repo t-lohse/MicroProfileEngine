@@ -16,11 +16,13 @@ find_program(CPPCHECK_EXECUTABLE cppcheck)
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     message(STATUS "Using Clang: Enabling Clang-specific flags")
     # Only apply analyzer flags for clang-tidy, not the compiler
-   # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror ")
-    #set(CMAKE_CXX_CLANG_TIDY "clang-tidy;-header-filter=^(?!.*_deps).*")
+    #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror -Wall")
+    set(CMAKE_CXX_CLANG_TIDY "clang-tidy;-header-filter=^(?!.*_deps).*")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     message(STATUS "Using GCC: Enabling GCC-specific flags")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fanalyzer")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=stdlibc++")
 else()
     message(STATUS "Unknown compiler: No specific flags set")
 endif()
@@ -65,9 +67,10 @@ if(CPPCHECK_EXECUTABLE)
     add_custom_target(
             cppcheck
             COMMAND ${CPPCHECK_EXECUTABLE} --inconclusive
-                #--enable=all
-                #--disable=missingIncludeSystem
-                #--error-exitcode=1
+                --enable=all
+            --disable=missingInclude
+            --disable=unusedFunction
+                --error-exitcode=1
                 ${CPPCHECK_INCLUDE_DIRS}
             COMMENT "Running Cppcheck static analysis"
     )

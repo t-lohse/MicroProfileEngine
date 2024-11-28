@@ -10,8 +10,10 @@
 #include "types.hpp"
 #include "Stage.hpp"
 
-namespace profile {
-    class Profile {
+namespace profile
+{
+    class Profile
+    {
         temperature_t startingTemp;
         weight_t targetWeight;
         bool waiting_after_heating, autoPurge;
@@ -23,13 +25,11 @@ namespace profile {
         weight_t getTargetWeight() const;
         bool shouldWaitAfterHeating() const;
         bool shouldAutoPurge() const;
-        const std::unordered_map<uint8_t, const Stage>& getStages() const;
-        const std::unordered_map<uint8_t, const StageLog>& getStageLogs() const;
+        const std::unordered_map<uint8_t, Stage>& getStages() const;
+        const std::unordered_map<uint8_t, StageLog>& getStageLogs() const;
         std::unordered_map<uint8_t, StageLog>& getStageLogs();
     };
 
+}  // namespace profile
 
-}
-
-
-#endif //MICROPROFILEENGINE_PROFILE_HPP
+#endif  // MICROPROFILEENGINE_PROFILE_HPP

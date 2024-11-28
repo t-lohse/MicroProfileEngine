@@ -11,41 +11,40 @@
 
 #include "types.hpp"
 
-
 template <typename T>
 concept SensorState = requires(T v) {
-    {v.pistonPosition()} -> std::same_as<double>;
-    {v.pistonSpeed()} -> std::same_as<double>;
-    {v.waterTemperature()} -> std::same_as<double>;
-    {v.cylinderTemperature()} -> std::same_as<double>;
-    {v.externalTemperature1()} -> std::same_as<double>;
-    {v.externalTemperature2()} -> std::same_as<double>;
-    {v.tubeTemperature()} -> std::same_as<double>;
-    {v.plungerTemperature()} -> std::same_as<double>;
-    {v.waterFlow()} -> std::same_as<double>;
-    {v.waterPressure()} -> std::same_as<double>;
-    {v.predictiveTemperature()} -> std::same_as<double>;
-    {v.weight()} -> std::same_as<double>;
-    {v.temperatureUp()} -> std::same_as<double>;
-    {v.temperatureMiddleUp()} -> std::same_as<double>;
-    {v.temperatureMiddleDown()} -> std::same_as<double>;
-    {v.temperatureDown()} -> std::same_as<double>;
-    {v.outputPosition()} -> std::same_as<double>;
-    {v.motorEncoder()} -> std::same_as<double>;
-    {v.stableTemperature()} -> std::same_as<double>;
-    {v.hasWater()} -> std::same_as<bool>;
+    { v.pistonPosition() } -> std::same_as<double>;
+    { v.pistonSpeed() } -> std::same_as<double>;
+    { v.waterTemperature() } -> std::same_as<double>;
+    { v.cylinderTemperature() } -> std::same_as<double>;
+    { v.externalTemperature1() } -> std::same_as<double>;
+    { v.externalTemperature2() } -> std::same_as<double>;
+    { v.tubeTemperature() } -> std::same_as<double>;
+    { v.plungerTemperature() } -> std::same_as<double>;
+    { v.waterFlow() } -> std::same_as<double>;
+    { v.waterPressure() } -> std::same_as<double>;
+    { v.predictiveTemperature() } -> std::same_as<double>;
+    { v.weight() } -> std::same_as<double>;
+    { v.temperatureUp() } -> std::same_as<double>;
+    { v.temperatureMiddleUp() } -> std::same_as<double>;
+    { v.temperatureMiddleDown() } -> std::same_as<double>;
+    { v.temperatureDown() } -> std::same_as<double>;
+    { v.outputPosition() } -> std::same_as<double>;
+    { v.motorEncoder() } -> std::same_as<double>;
+    { v.stableTemperature() } -> std::same_as<double>;
+    { v.hasWater() } -> std::same_as<bool>;
 };
 
-
 template <SensorState T>
-class Driver {
+class Driver
+{
     T sensors;
 
 public:
-    const T& getSensorState( std::string _source, std::string _gesture) const;
-    bool getButtonGesture() const;
+    const T& getSensorState() const;
+    bool getButtonGesture(std::string _source, std::string _gesture) const;
     bool heatingFinished() const;
-    bool hasReachedFinalWeight()const;
+    bool hasReachedFinalWeight() const;
     void setTargetWeight(profile::weight_t setPoint);
     void setTargetTemperature(profile::temperature_t setPoint);
     void setTargetPressure(profile::pressure_t setPoint);
@@ -56,7 +55,8 @@ public:
     void setTargetPistonPosition(double setPoint);
 };
 
-struct DummySensorState {
+struct DummySensorState
+{
     gsl::not_null<std::unique_ptr<double>> _pistonPosition;
     double _pistonSpeed;
     double _waterTemperature;
@@ -78,6 +78,7 @@ struct DummySensorState {
     double _stableTemperature;
     bool _hasWater;
 
+public:
     double pistonPosition() const;
     double pistonSpeed() const;
     double waterTemperature() const;
@@ -97,8 +98,7 @@ struct DummySensorState {
     double outputPosition() const;
     double motorEncoder() const;
     double stableTemperature() const;
-    bool hasWater()const;
+    bool hasWater() const;
 };
 
-
-#endif //MICROPROFILEENGINE_SENSOR_HPP
+#endif  // MICROPROFILEENGINE_SENSOR_HPP

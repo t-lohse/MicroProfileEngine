@@ -11,21 +11,26 @@
 #include "gsl/gsl"
 #include "types.hpp"
 
-namespace profile {
-    struct ControlType {
+namespace profile
+{
+    struct ControlType
+    {
         enum Type : uint8_t {
-            PRESSURE = 0,
-            FLOW = 1,
-            POWER = 2,
-            PISTON_POSITION = 3,
+            Pressure = 0,
+            Flow = 1,
+            Power = 2,
+            PistonPosition = 3,
         };
 
-        static constexpr int WIDTH = log2(static_cast<int>(Type::PISTON_POSITION)) + 1;
+        static constexpr int WIDTH = log2(static_cast<int>(Type::PistonPosition)) + 1;
+
+        operator Type() const;
 
     private:
         Type value;
     };
-    struct InputType {
+    struct InputType
+    {
         enum Type : uint8_t {
             TIME = 0,
             PISTON_POSITION = 1,
@@ -33,29 +38,39 @@ namespace profile {
         };
         static constexpr int WIDTH = log2(static_cast<int>(Type::WEIGHT)) + 1;
 
+        operator Type() const;
+
     private:
         Type value;
     };
 
-    struct Point {
+    struct Point
+    {
         double x, y;
     };
 
-    struct InterpolationAlgorithm {
-       virtual double getValue(gsl::span<Point> points, double index, std::size_t current_index) = 0;
-       virtual ~InterpolationAlgorithm() = default;
+    struct InterpolationAlgorithm
+    {
+        virtual double getValue(gsl::span<Point> points, double index, std::size_t current_index) = 0;
+        virtual ~InterpolationAlgorithm() = default;
     };
 
-    struct LinearInterpolation : public InterpolationAlgorithm {
+    struct LinearInterpolation : public InterpolationAlgorithm
+    {
         double getValue(gsl::span<Point> points, double index, std::size_t current_index) override;
         ~LinearInterpolation() override = default;
     };
 
-    struct Limit {
+    struct Limit
+    {
         enum Type : uint8_t {
             Pressure = 0,
             Flow = 1,
         };
+
+        operator Type() const;
+        double operator*() const;
+
     private:
         Type type;
         double value;
@@ -63,19 +78,17 @@ namespace profile {
 
     struct SegmentIndexOrValue;
 
-    class Dynamics {
+    class Dynamics
+    {
         InputType inputSelect;
         std::unique_ptr<InterpolationAlgorithm> interpolation;
         std::vector<Point> points;
 
-        std::variant<size_t, double> find_current_segment(double input);
-//        SegmentIndexOrValue find_current_segment(double input);
+        std::variant<size_t, double> find_current_segment(double input) const;
+        //        SegmentIndexOrValue find_current_segment(double input);
     public:
-        //Dynamics(Dynamics&) = default;
-
-        InputType inputType();
-        double runInterpolation(double input);
-
+        InputType inputType() const;
+        double runInterpolation(double input) const;
     };
-}
-#endif //MICROPROFILEENGINE_DYNAMICS_HPP
+}  // namespace profile
+#endif  // MICROPROFILEENGINE_DYNAMICS_HPP

@@ -5,6 +5,7 @@
 #include "Dynamics.hpp"
 #include "Profile.hpp"
 #include "sensor.hpp"
+#include "engine.hpp"
 
 #include <chrono>
 #include <thread>
@@ -12,7 +13,7 @@
 #include <gsl/gsl>
 #include "iostream"
 
-const char* profileJson = R"JSON({
+const char* const profileJson = R"JSON({
     "name": "E61 with dropping pressure",
     "id": "4cdc0015-07cd-4738-b198-c7d8742acd2b",
     "author": "Carlos",
