@@ -5,6 +5,7 @@
 #include <optional>
 #include <chrono>
 #include "types.hpp"
+#include "ArduinoJson.h"
 
 #include "sensor.hpp"
 
