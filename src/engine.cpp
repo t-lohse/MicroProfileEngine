@@ -98,9 +98,9 @@ std::expected<ProfileState, std::string> ProfileEngineRunning<T>::processStageSt
     double inputRefVal = NAN;
     switch (stageDyn->inputType()) {
         using IT = profile::InputType;
-    case IT::TIME: inputRefVal = elapsed.count(); break;
-    case IT::PISTON_POSITION: inputRefVal = driver.getSensorState().pistonPosition(); break;
-    case IT::WEIGHT: inputRefVal = driver.getSensorState().weight(); break;
+    case IT::Time: inputRefVal = elapsed.count(); break;
+    case IT::PistonPosition: inputRefVal = driver.getSensorState().pistonPosition(); break;
+    case IT::Weight: inputRefVal = driver.getSensorState().weight(); break;
     }
 
     auto sampledOutput = stageDyn->runInterpolation(inputRefVal);
@@ -168,8 +168,8 @@ ProfileEngineRunning<T> ProfileEngineIdle<T>::start() &&
 }
 
 template <SensorState T>
-ProfileEngineIdle<T>::ProfileEngineIdle(Driver<T> driver, gsl::not_null<profile::Profile*> profile):
-    driver{driver}, profile(profile)
+ProfileEngineIdle<T>::ProfileEngineIdle(Driver<T>&& driver, gsl::not_null<profile::Profile*> profile):
+    driver{std::move(driver)}, profile(profile)
 {}
 
 // template<SensorState T>

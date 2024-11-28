@@ -33,10 +33,7 @@ namespace profile
     {
         return ExitType(static_cast<ExitType::Type>(((_value >> TYPE_OFFSET)) & (pow(2, ExitType::WIDTH) - 1)));
     }
-    ExitType::operator Type() const {
-    
-        return value;
-    }
+    ExitType::operator Type() const { return value; }
     ExitComparison ExitTrigger::exitComp() const
     {
         return ExitComparison(
@@ -80,4 +77,6 @@ namespace profile
         exitComp().comp(lhs, rhs);
         return true;
     }
+
+
 }  // namespace profile

@@ -84,9 +84,83 @@ const char* const profileJson = R"JSON({
     ]
 })JSON";
 
+const char* const ex = R"JSON({
+"stages": [
+        {
+            "name": "stage 1",
+            "type": "power",
+            "dynamics": {
+                "points": [
+                    [0, 100],
+                    [10, 50],
+                    [20, 40]
+                ],
+                "over": "piston_position",
+                "interpolation": "linear"
+            },
+            "exit_triggers": [
+                {
+                    "type": "time",
+                    "value": 3
+                },
+                {
+                    "type": "pressure",
+                    "value": 4
+                }
+            ]
+        },
+        {
+            "name": "stage 2",
+            "type": "flow",
+            "dynamics": {
+                "points": [
+                    [0, 8.5],
+                    [30, 6.5]
+                ],
+                "over": "time",
+                "interpolation": "linear"
+            },
+            "exit_triggers": [
+                {
+                    "type": "time",
+                    "value": 2,
+                    "relative": true
+                }
+            ],
+            "limits": [
+                {
+                    "type": "flow",
+                    "value": 3
+                }
+            ]
+        }
+    ]
+
+})JSON";
+
 
 int main(int argc, char** argv)
 {
+    JsonDocument doc;
+    deserializeJson(doc, profileJson);
+
+    //ArduinoJson::JsonObject st = doc;
+    auto profile = profile::Profile::fromJson(doc).value();
+
+    auto driver = Driver<DummySensorState>();
+
+    auto sensor_data = driver.getSensorState()._pistonPosition.operator->().get();
+
+    auto engine_idle = ProfileEngineIdle(std::move(driver), &profile);
+
+/*
+    ArduinoJson::JsonArray limt = doc["limits"];
+    ArduinoJson::JsonArray et = doc["exit_triggers"];
+    ArduinoJson::JsonObject dyn = doc["dynamics"];
+    auto pis = profile::ExitTrigger::fromJson(std::move(et)).value();
+    auto pis2 = profile::Limit::fromJson(std::move(limt)).value();
+    profile::Dynamics::fromJson(dyn).value();
+*/
 /*
     ProfileGenerator generator(profileJson);
     Profile maxProfile = generator.profile;

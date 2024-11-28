@@ -41,6 +41,7 @@ class Driver
     T sensors;
 
 public:
+    explicit Driver() = default;
     const T& getSensorState() const;
     bool getButtonGesture(std::string _source, std::string _gesture) const;
     bool heatingFinished() const;
@@ -79,6 +80,7 @@ struct DummySensorState
     bool _hasWater;
 
 public:
+    DummySensorState() : _pistonPosition(std::unique_ptr<double>(new double{0})) { };
     double pistonPosition() const;
     double pistonSpeed() const;
     double waterTemperature() const;

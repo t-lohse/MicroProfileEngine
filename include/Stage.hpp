@@ -30,6 +30,7 @@ namespace profile
         std::vector<Limit>& getLimits();
         ControlType getControlType();
          */
+
     };
 
     class StageVariables

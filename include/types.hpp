@@ -5,6 +5,9 @@
 #ifndef MICROPROFILEENGINE_TYPES_HPP
 #define MICROPROFILEENGINE_TYPES_HPP
 #include <cstdint>
+#include "string"
+#include "variant"
+
 namespace profile
 {
     class flow_t
@@ -70,6 +73,39 @@ namespace profile
             ++i;
         return i;
     }
+
+    struct ProfileError {
+        enum class TypeErr : uint8_t {
+            Name, Type, JsonParsing
+        };
+
+        operator TypeErr() const {
+            return type;
+        }
+
+        static ProfileError nameError(std::string &&s) {
+            return ProfileError(TypeErr::Name, s);
+        }
+        static ProfileError typeError(std::string &&s) {
+            return ProfileError(TypeErr::Type, s);
+        }
+        static ProfileError parseError(std::string &&s) {
+            return ProfileError(TypeErr::JsonParsing, s);
+        }
+        static ProfileError noName(std::string &&s) {
+            return ProfileError(TypeErr::Name, "Expected entry named `" + s + "`, could not find");
+        }
+        static ProfileError enexpectedType(std::string &&s) {
+            return ProfileError(TypeErr::Name, "Expected type `" + s + "`, got something else");
+        }
+
+
+    private:
+        using ValType = std::variant<std::string>;
+        ProfileError(TypeErr t, ValType v) : type(t), value(v) {};
+        TypeErr type;
+        ValType value;
+    };
 }  // namespace profile
 
 #endif  // MICROPROFILEENGINE_TYPES_HPP

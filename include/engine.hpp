@@ -63,7 +63,6 @@ class ProfileEngineIdle
     friend class ProfileEngineRunning<T>;
     friend class EngineStepResult<T>;
 
-    ProfileEngineIdle(Driver<T> driver, gsl::not_null<profile::Profile*> profile);
 
 public:
     ProfileEngineIdle() = delete;
@@ -72,6 +71,7 @@ public:
     ProfileEngineIdle(ProfileEngineIdle&&) = default;
     ProfileEngineIdle& operator=(ProfileEngineIdle&&) = default;
     ~ProfileEngineIdle() = default;
+    ProfileEngineIdle(Driver<T>&& driver, gsl::not_null<profile::Profile*> profile);
 
     ProfileEngineRunning<T> start() &&;
 };
