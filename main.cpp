@@ -3,6 +3,8 @@
 //#include "SimplifiedProfileEngine.hpp"
 //#include "ProfileGenerator.hpp"
 #include "Dynamics.hpp"
+#include "Profile.hpp"
+#include "sensor.hpp"
 
 #include <chrono>
 #include <thread>

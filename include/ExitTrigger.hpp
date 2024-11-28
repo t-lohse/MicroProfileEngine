@@ -4,19 +4,11 @@
 #include <cstdint>
 #include <optional>
 #include <chrono>
+#include "types.hpp"
 
-
-// TODO: Concept, or dispatch?
-template <typename>
-struct Driver;
+#include "sensor.hpp"
 
 namespace profile {
-    static constexpr int log2(int index) {
-        int i = 0;
-        while (index >>= 1) ++i;
-        return i;
-    }
-
     class ExitTrigger;
     struct ExitType {
         enum Type : uint8_t {
@@ -74,7 +66,7 @@ namespace profile {
         std::optional<uint8_t> targetStage();
         uint32_t value();
 
-        template<typename T>
+        template<SensorState T>
         bool checkCond(Driver<T> input, std::chrono::system_clock &stageTime, std::chrono::system_clock &profileTime);
     };
 }

@@ -36,8 +36,9 @@ namespace profile {
         return ((_value >> VALUE_OFFSET)) & (pow(2, UINT32_WIDTH) - 1);
     }
 
-    template<typename T>
+    template<SensorState T>
     bool ExitTrigger::checkCond(Driver<T> input, std::chrono::system_clock &stageTime, std::chrono::system_clock &profileTime){
+        // TODO: DO
         return true;
     }
 }

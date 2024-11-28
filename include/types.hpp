@@ -6,29 +6,47 @@
 #define MICROPROFILEENGINE_TYPES_HPP
 #include <cstdint>
 namespace profile {
-    typedef uint8_t flow_t;
-    typedef uint8_t pressure_t;
-    typedef uint8_t percent_t;
-    typedef uint16_t temperature_t;
-    typedef uint16_t weight_t;
-    typedef uint16_t timestamp_t;
+    class flow_t {double val;
+    public:
+    flow_t() = delete;
+    flow_t(double v) : val{v} {};
+    double get() const;
+    double getRaw() const;
+    };
+    class pressure_t {double val;
+    public:
+        pressure_t() = delete;
+        pressure_t(double v);
+        double get() const;
+        double getRaw() const;
+    };
+    class percent_t {double val;
+    public:
+        percent_t() = delete;
+        percent_t(double v);
+        double get() const;
+        double getRaw() const;
+    };
+    class temperature_t {double val;
+    public:
+        temperature_t() = delete;
+        temperature_t(double v);
+        double get() const;
+        double getRaw() const;
+    };
+    class weight_t {double val;
+    public:
+        weight_t() = delete;
+        weight_t(double v);
+        double get() const;
+        double getRaw() const;
+    };
 
-
-    double parseProfileFlow(flow_t flow);
-    double parseProfilePressure(pressure_t pressure);
-    double parseProfilePercent(percent_t percent);
-    double parseProfileTemperature(temperature_t temperature);
-    double parseProfileWeight(weight_t weight);
-    double parseProfileTime(timestamp_t time);
-    double parseExitValue(uint32_t val);
-
-    flow_t writeProfileFlow(double flow);
-    pressure_t writeProfilePressure(double pressure);
-    percent_t writeProfilePercent(double percent);
-    temperature_t writeProfileTemperature(double temperature);
-    weight_t writeProfileWeight(double weight);
-    timestamp_t writeProfileTime(double time);
-    uint32_t writeExitValue(double exit);
+    static constexpr int log2(int index) {
+        int i = 0;
+        while (index >>= 1) ++i;
+        return i;
+    }
 }
 
 #endif //MICROPROFILEENGINE_TYPES_HPP

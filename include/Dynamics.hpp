@@ -9,15 +9,9 @@
 #include <array>
 #include <variant>
 #include "gsl/gsl"
+#include "types.hpp"
 
 namespace profile {
-    // TODO: Duplicate def
-    static constexpr int log2(int index) {
-        int i = 0;
-        while (index >>= 1) ++i;
-        return i;
-    }
-
     struct ControlType {
         enum Type : uint8_t {
             PRESSURE = 0,
@@ -48,11 +42,13 @@ namespace profile {
     };
 
     struct InterpolationAlgorithm {
-        virtual double getValue(gsl::span<Point> points, double index, std::size_t current_index);
+       virtual double getValue(gsl::span<Point> points, double index, std::size_t current_index) = 0;
+       virtual ~InterpolationAlgorithm() = default;
     };
 
     struct LinearInterpolation : public InterpolationAlgorithm {
         double getValue(gsl::span<Point> points, double index, std::size_t current_index) override;
+        ~LinearInterpolation() override = default;
     };
 
     struct Limit {
@@ -75,6 +71,8 @@ namespace profile {
         std::variant<size_t, double> find_current_segment(double input);
 //        SegmentIndexOrValue find_current_segment(double input);
     public:
+        //Dynamics(Dynamics&) = default;
+
         InputType inputType();
         double runInterpolation(double input);
 
