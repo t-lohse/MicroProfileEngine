@@ -18,16 +18,20 @@ namespace profile
 {
     struct ControlType
     {
-        enum Type : uint8_t {
+        enum class Type : uint8_t {
             Pressure = 0,
             Flow = 1,
             Power = 2,
             PistonPosition = 3,
         };
-
+        using Type::Pressure;
+        using Type::Flow;
+        using Type::Power;
+        using Type::PistonPosition;
         static constexpr int WIDTH = log2(static_cast<int>(Type::PistonPosition)) + 1;
 
-        static std::expected<ControlType, ProfileError> fromJson(const ArduinoJson::JsonObject& a) {
+        static std::expected<ControlType, ProfileError> fromJson(const ArduinoJson::JsonObject& a)
+        {
             auto ev = a["type"];
             if (!ev)
                 return std::unexpected(ProfileError::noName("over"));
@@ -35,14 +39,16 @@ namespace profile
                 return std::unexpected(ProfileError::typeError("string"));
             auto typ = ev.as<std::string>();
 
-            if (typ == "pressure" ) {
+            if (typ == "pressure") {
                 return ControlType(Type::Pressure);
-            } if (typ == "flow" ) {
+            }
+            if (typ == "flow") {
                 return ControlType(Type::Flow);
-            } if (typ == "power" ) {
+            }
+            if (typ == "power") {
                 return ControlType(Type::Power);
             }
-            if (typ == "piston_position" ) {
+            if (typ == "piston_position") {
                 return ControlType(Type::PistonPosition);
             }
             return std::unexpected(ProfileError::noName("No valid value for field `over`"));
@@ -51,21 +57,25 @@ namespace profile
         operator Type() const;
 
     private:
-        explicit ControlType(Type t) : value{t}{}
+        explicit ControlType(Type t): value{t} {}
         Type value;
     };
     struct InputType
     {
-        enum Type : uint8_t {
+        enum class Type : uint8_t {
             Time = 0,
             PistonPosition = 1,
             Weight = 2,
         };
+        using Type::Time;
+        using Type::PistonPosition;
+        using Type::Weight;
         static constexpr int WIDTH = log2(static_cast<int>(Type::Weight)) + 1;
 
         operator Type() const;
 
-        static std::expected<InputType, ProfileError> fromJson(const ArduinoJson::JsonObject& a) {
+        static std::expected<InputType, ProfileError> fromJson(const ArduinoJson::JsonObject& a)
+        {
             auto ev = a["over"];
             if (!ev)
                 return std::unexpected(ProfileError::noName("over"));
@@ -73,20 +83,20 @@ namespace profile
                 return std::unexpected(ProfileError::typeError("string"));
             auto typ = ev.as<std::string>();
 
-            if (typ == "time" ) {
+            if (typ == "time") {
                 return InputType(Type::Time);
-            } if (typ == "piston_position" ) {
+            }
+            if (typ == "piston_position") {
                 return InputType(Type::PistonPosition);
             }
-            if (typ == "weight" ) {
+            if (typ == "weight") {
                 return InputType(Type::Weight);
             }
             return std::unexpected(ProfileError::noName("No valid value for field `over`"));
         }
 
-
     private:
-        explicit InputType(Type t) : value{t}{}
+        explicit InputType(Type t): value{t} {}
         Type value;
     };
 
@@ -94,7 +104,8 @@ namespace profile
     {
         double x, y;
 
-        static std::expected<std::vector<Point>, ProfileError> fromJson(const ArduinoJson::JsonObject& a) {
+        static std::expected<std::vector<Point>, ProfileError> fromJson(const ArduinoJson::JsonObject& a)
+        {
             // auto e = static_cast<JsonObject>(a);
             JsonArray p = a["points"];
             if (!p)
@@ -109,11 +120,11 @@ namespace profile
                 if (!_p)
                     return std::unexpected(_p.error());
                 out.emplace_back(_p.value());
-
             }
             return out;
         }
-        static std::expected<Point, ProfileError> fromJson(ArduinoJson::JsonArray&& obj) {
+        static std::expected<Point, ProfileError> fromJson(ArduinoJson::JsonArray&& obj)
+        {
             if (!obj)
                 return std::unexpected(ProfileError::typeError("what"));
             if (obj.size() != 2)
@@ -124,26 +135,28 @@ namespace profile
             if (!obj[1].is<double>())
                 return std::unexpected(ProfileError::enexpectedType("double"));
 
-            return Point(obj[0].as<double>(),obj[1].as<double>());
+            return Point(obj[0].as<double>(), obj[1].as<double>());
         }
 
     private:
-        Point(double x_, double y_) : x(x_), y(y_) {}
+        Point(double x_, double y_): x(x_), y(y_) {}
     };
 
     struct InterpolationAlgorithm
     {
-        virtual double getValue(gsl::span<Point> points, double index, std::size_t current_index) = 0;
+        virtual double getValue(std::vector<Point> points, double index, std::size_t current_index) = 0;
         virtual ~InterpolationAlgorithm() = default;
     };
 
     struct LinearInterpolation : public InterpolationAlgorithm
     {
-        double getValue(gsl::span<Point> points, double index, std::size_t current_index) override;
+        double getValue(std::vector<Point> points, double index, std::size_t current_index) override;
         ~LinearInterpolation() override = default;
     };
 
-    static std::expected<std::unique_ptr<InterpolationAlgorithm>, ProfileError> fromJsonInterpolation(const ArduinoJson::JsonObject& a) {
+    static std::expected<std::unique_ptr<InterpolationAlgorithm>, ProfileError> fromJsonInterpolation(
+        const ArduinoJson::JsonObject& a)
+    {
         auto ev = a["interpolation"];
         if (!ev)
             return std::unexpected(ProfileError::noName("interpolation"));
@@ -151,7 +164,7 @@ namespace profile
             return std::unexpected(ProfileError::typeError("string"));
         auto typ = ev.as<std::string>();
 
-        if (typ == "linear" ) {
+        if (typ == "linear") {
             return std::unique_ptr<InterpolationAlgorithm>(new LinearInterpolation());
         }
         return std::unexpected(ProfileError::typeError("only `linear` interpolation supported"));
@@ -159,17 +172,20 @@ namespace profile
 
     struct Limit
     {
-        enum Type : uint8_t {
+        enum class Type : uint8_t {
             Pressure = 0,
             Flow = 1,
         };
+        using Type::Pressure;
+        using Type::Flow;
 
         operator Type() const;
         double operator*() const;
 
-        static std::expected<Limit, ProfileError> fromJson(ArduinoJson::JsonObject& a) {
-           // auto e = static_cast<JsonObject>(a);
-           auto ev = a["value"];
+        static std::expected<Limit, ProfileError> fromJson(ArduinoJson::JsonObject& a)
+        {
+            // auto e = static_cast<JsonObject>(a);
+            auto ev = a["value"];
             if (!ev)
                 return std::unexpected(ProfileError::noName("value"));
             if (!ev.is<double>())
@@ -183,14 +199,16 @@ namespace profile
                 return std::unexpected(ProfileError::typeError("string"));
             auto typ = et.as<std::string>();
 
-            if (typ == "flow" ) {
+            if (typ == "flow") {
                 return Limit(Type::Flow, val);
-            } if (typ == "pressure" ) {
+            }
+            if (typ == "pressure") {
                 return Limit(Type::Pressure, val);
             }
             return std::unexpected(ProfileError::noName("No valid value for field `type`"));
         }
-        static std::expected<std::vector<Limit>, ProfileError> fromJson(ArduinoJson::JsonArray&& obj) {
+        static std::expected<std::vector<Limit>, ProfileError> fromJson(ArduinoJson::JsonArray&& obj)
+        {
             if (!obj)
                 return std::unexpected(ProfileError::noName("limits"));
             if (obj.size() <= 0)
@@ -208,7 +226,7 @@ namespace profile
         }
 
     private:
-        explicit Limit(Type t, double v) : type(t), value(v) {}
+        explicit Limit(Type t, double v): type(t), value(v) {}
         Type type;
         double value;
     };
@@ -223,17 +241,17 @@ namespace profile
 
         std::variant<size_t, double> find_current_segment(double input) const;
         //        SegmentIndexOrValue find_current_segment(double input);
-        explicit Dynamics(
-                std::vector<Point> points,
-                std::unique_ptr<InterpolationAlgorithm>&& interpolation,
-                InputType inputSelect
-        ) : points(points), interpolation(std::move(interpolation)), inputSelect(inputSelect) {}
+        explicit Dynamics(std::vector<Point> points, std::unique_ptr<InterpolationAlgorithm>&& interpolation,
+                          InputType inputSelect):
+            points(points), interpolation(std::move(interpolation)), inputSelect(inputSelect)
+        {}
 
     public:
         InputType inputType() const;
         double runInterpolation(double input) const;
 
-        static std::expected<Dynamics, ProfileError> fromJson(const ArduinoJson::JsonObject& a) {
+        static std::expected<Dynamics, ProfileError> fromJson(const ArduinoJson::JsonObject& a)
+        {
             // auto e = static_cast<JsonObject>(a);
             if (!a)
                 return std::unexpected(ProfileError::noName("dynamics"));

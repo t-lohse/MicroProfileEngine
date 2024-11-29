@@ -6,10 +6,15 @@
 #include "algorithm"
 namespace profile
 {
-    double LinearInterpolation::getValue(gsl::span<Point> points, double index, std::size_t current_index)
+    double LinearInterpolation::getValue(std::vector<Point> points, double input, std::size_t currentIndex)
     {
-        // TODO: do
-        return 0.0;
+        std::cout << "input: " << input << ", index: " << currentIndex << std::endl;
+
+        double slope = (points[currentIndex].y - points[currentIndex - 1].y) /
+                       (points[currentIndex].x - points[currentIndex - 1].y);
+        auto intercept = points[currentIndex].y - slope * points[currentIndex].x;
+
+        return (slope * input) + intercept;
     }
 
     std::variant<size_t, double> Dynamics::find_current_segment(double input) const
@@ -39,7 +44,7 @@ namespace profile
     };
     double Dynamics::runInterpolation(double input) const
     {
-        auto v = V{[&](size_t v) { return points[v].y; }, [](double v) { return v; }};
+        auto v = V{[&](size_t v) { return interpolation->getValue(points, input, v); }, [](double v) { return v; }};
         return std::visit(v, find_current_segment(input));
     }
 }  // namespace profile

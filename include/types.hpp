@@ -74,35 +74,27 @@ namespace profile
         return i;
     }
 
-    struct ProfileError {
-        enum class TypeErr : uint8_t {
-            Name, Type, JsonParsing
-        };
+    struct ProfileError
+    {
+        enum class TypeErr : uint8_t { Name, Type, JsonParsing };
 
-        operator TypeErr() const {
-            return type;
-        }
+        operator TypeErr() const { return type; }
 
-        static ProfileError nameError(std::string &&s) {
-            return ProfileError(TypeErr::Name, s);
-        }
-        static ProfileError typeError(std::string &&s) {
-            return ProfileError(TypeErr::Type, s);
-        }
-        static ProfileError parseError(std::string &&s) {
-            return ProfileError(TypeErr::JsonParsing, s);
-        }
-        static ProfileError noName(std::string &&s) {
+        static ProfileError nameError(std::string&& s) { return ProfileError(TypeErr::Name, s); }
+        static ProfileError typeError(std::string&& s) { return ProfileError(TypeErr::Type, s); }
+        static ProfileError parseError(std::string&& s) { return ProfileError(TypeErr::JsonParsing, s); }
+        static ProfileError noName(std::string&& s)
+        {
             return ProfileError(TypeErr::Name, "Expected entry named `" + s + "`, could not find");
         }
-        static ProfileError enexpectedType(std::string &&s) {
+        static ProfileError enexpectedType(std::string&& s)
+        {
             return ProfileError(TypeErr::Name, "Expected type `" + s + "`, got something else");
         }
 
-
     private:
         using ValType = std::variant<std::string>;
-        ProfileError(TypeErr t, ValType v) : type(t), value(v) {};
+        ProfileError(TypeErr t, ValType v): type(t), value(v) {};
         TypeErr type;
         ValType value;
     };

@@ -27,7 +27,7 @@ double DummySensorState::stableTemperature() const { return _stableTemperature; 
 bool DummySensorState::hasWater() const { return _hasWater; }
 
 // Driver
-namespace hardware
+namespace hardware_connection
 {
     bool heatingFinished() { return true; }
     bool hasReachedFinalWeight() { return false; }
@@ -54,65 +54,4 @@ namespace hardware
     {
         std::cout << "Setting target piston position to " << setPoint << std::endl;
     }
-}  // namespace hardware
-
-template <SensorState T>
-const T& Driver<T>::getSensorState() const
-{
-    return sensors;
-}
-template <SensorState T>
-bool Driver<T>::getButtonGesture(std::string _source, std::string _gesture) const
-{
-    return true;
-}
-template <SensorState T>
-bool Driver<T>::heatingFinished() const
-{
-    return hardware::heatingFinished();
-}
-template <SensorState T>
-bool Driver<T>::hasReachedFinalWeight() const
-{
-    return hardware::hasReachedFinalWeight();
-}
-template <SensorState T>
-void Driver<T>::setTargetWeight(profile::weight_t setPoint)
-{
-    return hardware::setTargetWeight(setPoint);
-}
-template <SensorState T>
-void Driver<T>::setTargetTemperature(profile::temperature_t setPoint)
-{
-    return hardware::setTargetTemperature(setPoint);
-}
-template <SensorState T>
-void Driver<T>::setTargetPressure(profile::pressure_t setPoint)
-{
-    return hardware::setTargetPressure(setPoint);
-}
-template <SensorState T>
-void Driver<T>::setPressureLimit(profile::pressure_t setPoint)
-{
-    return hardware::setPressureLimit(setPoint);
-}
-template <SensorState T>
-void Driver<T>::setTargetFlow(profile::flow_t setPoint)
-{
-    return hardware::setTargetFlow(setPoint);
-}
-template <SensorState T>
-void Driver<T>::setFlowLimit(profile::pressure_t setPoint)
-{
-    return hardware::setFlowLimit(setPoint);
-}
-template <SensorState T>
-void Driver<T>::setTargetPower(double setPoint)
-{
-    return hardware::setTargetPower(setPoint);
-}
-template <SensorState T>
-void Driver<T>::setTargetPistonPosition(double setPoint)
-{
-    return hardware::setTargetPistonPosition(setPoint);
-}
+}  // namespace hardware_connection

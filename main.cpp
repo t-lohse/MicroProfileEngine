@@ -149,46 +149,39 @@ int main(int argc, char** argv)
 
     auto driver = Driver<DummySensorState>();
 
-    auto sensor_data = driver.getSensorState()._pistonPosition.operator->().get();
+    auto pistonPos = driver.getSensorState()._pistonPosition;
+    auto engineIdle = ProfileEngineIdle(std::move(driver), &profile);
+    std::cout << "Starting engine" << std::endl;
+    auto engine = std::move(engineIdle).start();
+    std::cout << "The engine is in state: " << engine.getState() << std::endl;
 
-    auto engine_idle = ProfileEngineIdle(std::move(driver), &profile);
-
-/*
-    ArduinoJson::JsonArray limt = doc["limits"];
-    ArduinoJson::JsonArray et = doc["exit_triggers"];
-    ArduinoJson::JsonObject dyn = doc["dynamics"];
-    auto pis = profile::ExitTrigger::fromJson(std::move(et)).value();
-    auto pis2 = profile::Limit::fromJson(std::move(limt)).value();
-    profile::Dynamics::fromJson(dyn).value();
-*/
-/*
-    ProfileGenerator generator(profileJson);
-    Profile maxProfile = generator.profile;
-
-    Driver driver;
-    SimplifiedProfileEngine engine(&maxProfile, &driver);
-    printf("After creating the engine is in state: %d\n", (short)engine.state);
-
-    try
-    {
-        engine.step();
-        printf("After one step without starting the engine is in state: %d\n", (short)engine.state);
-        printf("Starting engine\n");
-        engine.start();
-        printf("The engine is in state: %d\n",(short) engine.state);
-        while (engine.state != ProfileState::DONE) {
-            engine.step();
-            std::this_thread::sleep_for(std::chrono::milliseconds(50));
-            // We fake the piston moving 1% each step to show the piston position samping capabilities
-            if (engine.state == ProfileState::BREWING)
-                driver.sensors.piston_position = std::min<double>(driver.sensors.piston_position + 1, 100.0);
+    while (engine.getState() != ProfileState::Done) {
+        auto newEng = std::move(engine).step();
+        bool dip = false;
+        switch (newEng) {
+            using T = EngineStepResult<DummySensorState>;
+            case T::Next:
+                engine = std::move(newEng).getNext();
+                break;
+            case T::Finished:
+                dip = true;
+                break;
+            case T::Error:
+                std::cout << "No stages in profile!!! Error: `" << std::move(newEng).getError() << "`" << std::endl;
+                return 1;
         }
-        printf("Profile execution finished.\n");
-        printf("Profile allocated 0x%02lX bytes(%ld kB) of ram for all %d stages combined\n", generator.memoryUsed, generator.memoryUsed / 1024, maxProfile.stages_len);
+        if (dip)
+            break;
+
+        const int SLEEP_TIME = 50;
+        std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_TIME));
+        std::cout << "The engine is in state: " << engine.getState() << std::endl;
+
+        if (engine.getState() == ProfileState::Brewing) {
+            const double PISTON_CAP = 100;
+            *pistonPos = std::min<double>(*pistonPos + 1, PISTON_CAP);
+            std::cout << "Piston: " << *pistonPos << std::endl;
+        }
     }
-    catch (const NoStagesInProfileException *&e)
-    {
-        printf("No Stages in profile!!!");
-    }
-    */
+    std::cout << "Profile execution finished." << std::endl;
 }
