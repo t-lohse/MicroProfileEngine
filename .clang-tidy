@@ -9,7 +9,6 @@ FormatStyle: none
 
 #-*,
 #cppcoreguidelines-*,
-#bugprone-*,
 #performance-*,
 #readability-*,
 #clang-analyzer-*,

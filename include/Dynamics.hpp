@@ -8,11 +8,12 @@
 #include <cstdint>
 #include <array>
 #include <variant>
-#include "gsl/gsl"
+#include <gsl/gsl>
+#include <iostream>
+
 #include "types.hpp"
 #include "ArduinoJson.h"
 #include "expected"
-#include <iostream>
 
 namespace profile
 {
@@ -28,7 +29,7 @@ namespace profile
         using Type::Flow;
         using Type::Power;
         using Type::PistonPosition;
-        static constexpr int WIDTH = log2(static_cast<int>(Type::PistonPosition)) + 1;
+        // static constexpr int WIDTH = log2(static_cast<int>(Type::PistonPosition)) + 1;
 
         static std::expected<ControlType, ProfileError> fromJson(const ArduinoJson::JsonObject& a)
         {
@@ -70,7 +71,7 @@ namespace profile
         using Type::Time;
         using Type::PistonPosition;
         using Type::Weight;
-        static constexpr int WIDTH = log2(static_cast<int>(Type::Weight)) + 1;
+        // static constexpr int WIDTH = log2(static_cast<int>(Type::Weight)) + 1;
 
         operator Type() const;
 
@@ -116,14 +117,14 @@ namespace profile
             std::vector<Point> out{};
             out.reserve(p.size());
             for (JsonArray o : p) {
-                auto _p = Point::fromJson(std::move(o));
+                auto _p = Point::fromJson(o);
                 if (!_p)
                     return std::unexpected(_p.error());
                 out.emplace_back(_p.value());
             }
             return out;
         }
-        static std::expected<Point, ProfileError> fromJson(ArduinoJson::JsonArray&& obj)
+        static std::expected<Point, ProfileError> fromJson(ArduinoJson::JsonArray& obj)
         {
             if (!obj)
                 return std::unexpected(ProfileError::typeError("what"));
@@ -131,9 +132,9 @@ namespace profile
                 return std::unexpected(ProfileError::parseError("Wrong sized points, only 2 items allowed"));
 
             if (!obj[0].is<double>())
-                return std::unexpected(ProfileError::enexpectedType("double"));
+                return std::unexpected(ProfileError::unexpectedType("double"));
             if (!obj[1].is<double>())
-                return std::unexpected(ProfileError::enexpectedType("double"));
+                return std::unexpected(ProfileError::unexpectedType("double"));
 
             return Point(obj[0].as<double>(), obj[1].as<double>());
         }
@@ -145,13 +146,29 @@ namespace profile
     struct InterpolationAlgorithm
     {
         virtual double getValue(std::vector<Point> points, double index, std::size_t current_index) = 0;
+
         virtual ~InterpolationAlgorithm() = default;
+        InterpolationAlgorithm() = default;
+
+        InterpolationAlgorithm(const InterpolationAlgorithm&) = delete;
+        InterpolationAlgorithm& operator=(const InterpolationAlgorithm&) = delete;
+
+        InterpolationAlgorithm(InterpolationAlgorithm&&) = delete;
+        InterpolationAlgorithm& operator=(InterpolationAlgorithm&&) = delete;
     };
 
     struct LinearInterpolation : public InterpolationAlgorithm
     {
         double getValue(std::vector<Point> points, double index, std::size_t current_index) override;
+
         ~LinearInterpolation() override = default;
+        LinearInterpolation() = default;
+
+        LinearInterpolation(const LinearInterpolation&) = delete;
+        LinearInterpolation& operator=(const LinearInterpolation&) = delete;
+
+        LinearInterpolation(LinearInterpolation&&) = delete;
+        LinearInterpolation& operator=(LinearInterpolation&&) = delete;
     };
 
     static std::expected<std::unique_ptr<InterpolationAlgorithm>, ProfileError> fromJsonInterpolation(
@@ -207,8 +224,9 @@ namespace profile
             }
             return std::unexpected(ProfileError::noName("No valid value for field `type`"));
         }
-        static std::expected<std::vector<Limit>, ProfileError> fromJson(ArduinoJson::JsonArray&& obj)
+        static std::expected<std::vector<Limit>, ProfileError> fromJson(ArduinoJson::JsonArray&& arr)
         {
+            auto obj = std::move(arr);
             if (!obj)
                 return std::unexpected(ProfileError::noName("limits"));
             if (obj.size() <= 0)
@@ -231,13 +249,11 @@ namespace profile
         double value;
     };
 
-    struct SegmentIndexOrValue;
-
     class Dynamics
     {
-        InputType inputSelect;
-        std::unique_ptr<InterpolationAlgorithm> interpolation;
         std::vector<Point> points;
+        std::unique_ptr<InterpolationAlgorithm> interpolation;
+        InputType inputSelect;
 
         std::variant<size_t, double> find_current_segment(double input) const;
         //        SegmentIndexOrValue find_current_segment(double input);

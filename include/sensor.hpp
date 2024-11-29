@@ -5,9 +5,9 @@
 #ifndef MICROPROFILEENGINE_SENSOR_HPP
 #define MICROPROFILEENGINE_SENSOR_HPP
 
-#include "concepts"
-#include "string"
-#include "gsl/gsl"
+#include <concepts>
+#include <string>
+#include <gsl/gsl>
 
 #include "types.hpp"
 
@@ -58,9 +58,10 @@ public:
     explicit Driver() = default;
     const T& getSensorState() const { return sensors; }
     T& getSensorState() { return sensors; }
-    // const T& getSensorState() const;
-    // T& getSensorState();
-    bool getButtonGesture(std::string _source, std::string _gesture) const { return true; }
+    bool getButtonGesture([[maybe_unused]] std::string _source, [[maybe_unused]] std::string _gesture) const
+    {
+        return true;
+    }
     bool heatingFinished() const { return hardware_connection::heatingFinished(); }
     bool hasReachedFinalWeight() const { return hardware_connection::hasReachedFinalWeight(); }
     void setTargetWeight(profile::weight_t setPoint) { return hardware_connection::setTargetWeight(setPoint); }

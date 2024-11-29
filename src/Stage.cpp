@@ -35,15 +35,20 @@ namespace profile
         flow{flow}, pressure{pressure}, piston_pos{piston_pos}, timestamp{timestamp}
     {}
 
-    const std::chrono::time_point<std::chrono::system_clock>& StageVariables::getTimestamp() const { return timestamp; }
+    [[maybe_unused]] const std::chrono::time_point<std::chrono::system_clock>& StageVariables::getTimestamp() const
+    {
+        return timestamp;
+    }
 
     // StageLog
     bool StageLog::isValid() const { return entry.has_value(); }
-    std::optional<gsl::not_null<const StageVariables*>> StageLog::getEntry() const
+
+    [[maybe_unused]] std::optional<gsl::not_null<const StageVariables*>> StageLog::getEntry() const
     {
         return entry.transform([](auto& v) { return gsl::not_null{&v}; });
     }
-    std::optional<gsl::not_null<StageVariables*>> StageLog::getEntry()
+
+    [[maybe_unused]] std::optional<gsl::not_null<StageVariables*>> StageLog::getEntry()
     {
         return entry.transform([](auto& v) { return gsl::not_null{&v}; });
     }
@@ -54,7 +59,7 @@ namespace profile
         return old;
     }
 
-    std::optional<gsl::not_null<const StageVariables*>> StageLog::getExit() const
+    [[maybe_unused]] std::optional<gsl::not_null<const StageVariables*>> StageLog::getExit() const
     {
         return exit.transform([](auto& v) { return gsl::not_null{&v}; });
     }

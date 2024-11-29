@@ -1,17 +1,10 @@
+#include <thread>
+#include <iostream>
 
-//#include "ProfileDefinition.hpp"
-//#include "SimplifiedProfileEngine.hpp"
-//#include "ProfileGenerator.hpp"
 #include "Dynamics.hpp"
 #include "Profile.hpp"
 #include "sensor.hpp"
 #include "engine.hpp"
-
-#include <chrono>
-#include <thread>
-#include <algorithm>
-#include <gsl/gsl>
-#include "iostream"
 
 const char* const profileJson = R"JSON({
     "name": "E61 with dropping pressure",
@@ -84,67 +77,11 @@ const char* const profileJson = R"JSON({
     ]
 })JSON";
 
-const char* const ex = R"JSON({
-"stages": [
-        {
-            "name": "stage 1",
-            "type": "power",
-            "dynamics": {
-                "points": [
-                    [0, 100],
-                    [10, 50],
-                    [20, 40]
-                ],
-                "over": "piston_position",
-                "interpolation": "linear"
-            },
-            "exit_triggers": [
-                {
-                    "type": "time",
-                    "value": 3
-                },
-                {
-                    "type": "pressure",
-                    "value": 4
-                }
-            ]
-        },
-        {
-            "name": "stage 2",
-            "type": "flow",
-            "dynamics": {
-                "points": [
-                    [0, 8.5],
-                    [30, 6.5]
-                ],
-                "over": "time",
-                "interpolation": "linear"
-            },
-            "exit_triggers": [
-                {
-                    "type": "time",
-                    "value": 2,
-                    "relative": true
-                }
-            ],
-            "limits": [
-                {
-                    "type": "flow",
-                    "value": 3
-                }
-            ]
-        }
-    ]
-
-})JSON";
-
-
-int main(int argc, char** argv)
+int main()
 {
     JsonDocument doc;
     deserializeJson(doc, profileJson);
 
-    //ArduinoJson::JsonObject st = doc;
     auto profile = profile::Profile::fromJson(doc).value();
 
     auto driver = Driver<DummySensorState>();
@@ -173,7 +110,7 @@ int main(int argc, char** argv)
         if (dip)
             break;
 
-        const int SLEEP_TIME = 50;
+        const long SLEEP_TIME = 50;
         std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_TIME));
         std::cout << "The engine is in state: " << engine.getState() << std::endl;
 

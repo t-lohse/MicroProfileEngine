@@ -4,12 +4,12 @@
 #include <cstdint>
 #include <optional>
 #include <chrono>
-#include "types.hpp"
-#include "ArduinoJson.h"
-#include "expected"
-#include "iostream"
-#include "vector"
+#include <ArduinoJson.h>
+#include <expected>
+#include <iostream>
+#include <vector>
 
+#include "types.hpp"
 #include "sensor.hpp"
 
 namespace profile
@@ -150,9 +150,6 @@ namespace profile
     class ExitTrigger
     {
     private:
-        // ExitType _type : ExitType::WIDTH;
-        // ExitComparison _comparison : ExitComparison::WIDTH;
-        // uint8_t _target_stage;
         uint32_t _value;
         static constexpr int TYPE_OFFSET = 0;
         static constexpr int COMP_OFFSET = ExitType::WIDTH;
@@ -167,21 +164,22 @@ namespace profile
         std::optional<uint8_t> targetStage() const;
         uint32_t value() const;
 
-        static std::expected<ExitTrigger, ProfileError> fromJson(ArduinoJson::JsonObject&& a,
+        static std::expected<ExitTrigger, ProfileError> fromJson(ArduinoJson::JsonObject&& obj,
                                                                  std::unordered_map<std::string, uint8_t>& names)
         {
+            auto a = std::move(obj);
             auto et = ExitType::fromJson(a);
             if (!et)
                 return std::unexpected(et.error());
             ExitType type = et.value();
             auto comp = ExitComparison::fromJson(a).value_or(ExitComparison(ExitComparison::Greater));
-            uint8_t targetStage;
 
-            auto ts = a["target_stage"];
-            if (ts && names.contains(ts.as<std::string>())) {
-                targetStage = names[ts.as<std::string>()];
-            } else {
-                targetStage = 0;
+            uint8_t targetStage = 0;
+            {
+                auto ts = a["target_stage"];
+                if (ts && names.contains(ts.as<std::string>())) {
+                    targetStage = names[ts.as<std::string>()];
+                }
             }
 
             auto ev = a["value"];
@@ -191,8 +189,9 @@ namespace profile
             return ExitTrigger(type, comp, targetStage, value);
         }
         static std::expected<std::vector<ExitTrigger>, ProfileError> fromJson(
-            ArduinoJson::JsonArray&& obj, std::unordered_map<std::string, uint8_t>& names)
+            ArduinoJson::JsonArray&& arr, std::unordered_map<std::string, uint8_t>& names)
         {
+            auto obj = std::move(arr);
             if (!obj)
                 return std::unexpected(ProfileError::noName("exit_triggers"));
             if (obj.size() <= 0)
@@ -215,7 +214,7 @@ namespace profile
         {
             using ET = ExitType;
 
-            double lhs = NAN;
+            double lhs = std::numeric_limits<double>::min();
             switch (exitType()) {
             case ET::Pressure: lhs = input.getSensorState().waterPressure(); break;
             case ET::Flow: lhs = input.getSensorState().waterFlow(); break;

@@ -5,7 +5,7 @@
 #ifndef MICROPROFILEENGINE_PROFILE_HPP
 #define MICROPROFILEENGINE_PROFILE_HPP
 
-#include "unordered_map"
+#include <unordered_map>
 
 #include "types.hpp"
 #include "Stage.hpp"
@@ -35,7 +35,8 @@ namespace profile
         bool shouldWaitAfterHeating() const;
         bool shouldAutoPurge() const;
         const std::unordered_map<uint8_t, Stage>& getStages() const;
-        const std::unordered_map<uint8_t, StageLog>& getStageLogs() const;
+
+        [[maybe_unused]] const std::unordered_map<uint8_t, StageLog>& getStageLogs() const;
         std::unordered_map<uint8_t, StageLog>& getStageLogs();
 
         static std::expected<Profile, ProfileError> fromJson(ArduinoJson::JsonDocument& obj)
@@ -86,9 +87,9 @@ namespace profile
                 return std::unexpected(ProfileError::noName("name"));
             if (!n.is<std::string>())
                 return std::unexpected(ProfileError::typeError("string"));
-            auto name = n.as<std::string>();
+            const auto name = n.as<std::string>();
 
-            names.insert({n, i++});
+            names.insert({name, i++});
         }
         std::unordered_map<uint8_t, Stage> out{names.size()};
         for (const JsonObject& v : vals) {

@@ -4,11 +4,13 @@
 
 #ifndef MICROPROFILEENGINE_ENGINE_HPP
 #define MICROPROFILEENGINE_ENGINE_HPP
+#include <math.h>
+
+#include <expected>
+
 #include "sensor.hpp"
 #include "Profile.hpp"
 #include "Stage.hpp"
-
-#include <expected>
 
 enum class ProfileState {
     Start,
@@ -114,7 +116,7 @@ class ProfileEngineRunning
 
         auto stageDyn = gsl::not_null(&stage.getDynamics());
 
-        double inputRefVal = NAN;
+        double inputRefVal = NAN;  // = std::numeric_limits<double>::min();
         switch (stageDyn->inputType()) {
             using IT = profile::InputType;
         case IT::Time: inputRefVal = elapsed.count(); break;
@@ -261,17 +263,14 @@ public:
     using Type::Finished;
     using Type::Error;
 
-    operator Type() const
-    {
-        switch (value.index()) {
-        case 0: return Type::Next;
-        case 1: return Type::Finished;
-        case 2: return Type::Error;
-        }
-    }
+    operator Type() const { return static_cast<Type>(value.index()); }
 
     ProfileEngineRunning<T> getNext() && { return std::get<ProfileEngineRunning<T>>(std::move(value)); }
-    ProfileEngineIdle<T> getFinished() && { return std::get<ProfileEngineRunning<T>>(std::move(value)); }
+
+    [[maybe_unused]] ProfileEngineIdle<T> getFinished() &&
+    {
+        return std::get<ProfileEngineRunning<T>>(std::move(value));
+    }
     std::string getError() && { return std::get<std::string>(std::move(value)); }
 };
 

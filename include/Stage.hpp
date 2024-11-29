@@ -4,11 +4,13 @@
 #ifndef MICROPROFILEENGINE_STAGE_HPP
 #define MICROPROFILEENGINE_STAGE_HPP
 
-#include "vector"
-#include "optional"
+#include <vector>
+#include <optional>
+
 #include "Dynamics.hpp"
 #include "ExitTrigger.hpp"
 #include "types.hpp"
+
 namespace profile
 {
     class Stage
@@ -34,15 +36,16 @@ namespace profile
 
     class StageVariables
     {
-        flow_t flow;
-        pressure_t pressure;
-        percent_t piston_pos;
+        [[maybe_unused]] flow_t flow;
+        [[maybe_unused]] pressure_t pressure;
+        [[maybe_unused]] percent_t piston_pos;
         std::chrono::time_point<std::chrono::system_clock> timestamp;
 
     public:
         explicit StageVariables(flow_t flow, pressure_t pressure, percent_t piston_pos,
                                 std::chrono::time_point<std::chrono::system_clock> timestamp);
-        const std::chrono::time_point<std::chrono::system_clock>& getTimestamp() const;
+
+        [[maybe_unused]] const std::chrono::time_point<std::chrono::system_clock>& getTimestamp() const;
     };
 
     class StageLog
@@ -53,12 +56,14 @@ namespace profile
     public:
         explicit StageLog() = default;
         bool isValid() const;
-        std::optional<gsl::not_null<const StageVariables*>> getEntry() const;
-        std::optional<gsl::not_null<StageVariables*>> getEntry();
+
+        [[maybe_unused]] std::optional<gsl::not_null<const StageVariables*>> getEntry() const;
+
+        [[maybe_unused]] std::optional<gsl::not_null<StageVariables*>> getEntry();
         std::optional<StageVariables> putEntry(StageVariables s);
 
-        std::optional<gsl::not_null<const StageVariables*>> getExit() const;
-        std::optional<gsl::not_null<StageVariables*>> getExit();
+        [[maybe_unused]] std::optional<gsl::not_null<const StageVariables*>> getExit() const;
+        [[maybe_unused]] std::optional<gsl::not_null<StageVariables*>> getExit();
         std::optional<StageVariables> putExit(StageVariables s);
     };
 }  // namespace profile

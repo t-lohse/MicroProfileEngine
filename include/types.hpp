@@ -5,8 +5,8 @@
 #ifndef MICROPROFILEENGINE_TYPES_HPP
 #define MICROPROFILEENGINE_TYPES_HPP
 #include <cstdint>
-#include "string"
-#include "variant"
+#include <string>
+#include <variant>
 
 namespace profile
 {
@@ -16,10 +16,12 @@ namespace profile
 
     public:
         flow_t() = delete;
-        flow_t(double v);
-        double get() const;
+
+        [[maybe_unused]] flow_t(double v);
+
+        [[maybe_unused]] double get() const;
         operator double() const;
-        double getRaw() const;
+        [[maybe_unused]] double getRaw() const;
     };
     class pressure_t
     {
@@ -27,10 +29,10 @@ namespace profile
 
     public:
         pressure_t() = delete;
-        pressure_t(double v);
+        [[maybe_unused]] pressure_t(double v);
         operator double() const;
-        double get() const;
-        double getRaw() const;
+        [[maybe_unused]] double get() const;
+        [[maybe_unused]] double getRaw() const;
     };
     class percent_t
     {
@@ -38,10 +40,10 @@ namespace profile
 
     public:
         percent_t() = delete;
-        percent_t(double v);
+        [[maybe_unused]] percent_t(double v);
         operator double() const;
-        double get() const;
-        double getRaw() const;
+        [[maybe_unused]] double get() const;
+        [[maybe_unused]] double getRaw() const;
     };
     class temperature_t
     {
@@ -49,10 +51,11 @@ namespace profile
 
     public:
         temperature_t() = delete;
-        temperature_t(double v);
+
+        [[maybe_unused]] temperature_t(double v);
         operator double() const;
-        double get() const;
-        double getRaw() const;
+        [[maybe_unused]] double get() const;
+        [[maybe_unused]] double getRaw() const;
     };
     class weight_t
     {
@@ -60,10 +63,11 @@ namespace profile
 
     public:
         weight_t() = delete;
-        weight_t(double v);
+
+        [[maybe_unused]] weight_t(double v);
         operator double() const;
-        double get() const;
-        double getRaw() const;
+        [[maybe_unused]] double get() const;
+        [[maybe_unused]] double getRaw() const;
     };
 
     static constexpr int log2(int index)
@@ -80,23 +84,23 @@ namespace profile
 
         operator TypeErr() const { return type; }
 
-        static ProfileError nameError(std::string&& s) { return ProfileError(TypeErr::Name, s); }
-        static ProfileError typeError(std::string&& s) { return ProfileError(TypeErr::Type, s); }
-        static ProfileError parseError(std::string&& s) { return ProfileError(TypeErr::JsonParsing, s); }
+        static ProfileError nameError(std::string&& s) { return ProfileError(TypeErr::Name, std::move(s)); }
+        static ProfileError typeError(std::string&& s) { return ProfileError(TypeErr::Type, std::move(s)); }
+        static ProfileError parseError(std::string&& s) { return ProfileError(TypeErr::JsonParsing, std::move(s)); }
         static ProfileError noName(std::string&& s)
         {
-            return ProfileError(TypeErr::Name, "Expected entry named `" + s + "`, could not find");
+            return ProfileError(TypeErr::Name, "Expected entry named `" + std::move(s) + "`, could not find");
         }
-        static ProfileError enexpectedType(std::string&& s)
+        static ProfileError unexpectedType(std::string&& s)
         {
-            return ProfileError(TypeErr::Name, "Expected type `" + s + "`, got something else");
+            return ProfileError(TypeErr::Name, "Expected type `" + std::move(s) + "`, got something else");
         }
 
     private:
-        using ValType = std::variant<std::string>;
-        ProfileError(TypeErr t, ValType v): type(t), value(v) {};
+        using ErrType = std::variant<std::string>;
+        ProfileError(TypeErr t, ErrType v): type{t}, value{v} {};
         TypeErr type;
-        ValType value;
+        ErrType value;
     };
 }  // namespace profile
 

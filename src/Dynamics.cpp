@@ -1,15 +1,13 @@
 //
 // Created by lohse on 11/26/24.
 //
+#include <algorithm>
 
 #include "Dynamics.hpp"
-#include "algorithm"
 namespace profile
 {
     double LinearInterpolation::getValue(std::vector<Point> points, double input, std::size_t currentIndex)
     {
-        std::cout << "input: " << input << ", index: " << currentIndex << std::endl;
-
         double slope = (points[currentIndex].y - points[currentIndex - 1].y) /
                        (points[currentIndex].x - points[currentIndex - 1].y);
         auto intercept = points[currentIndex].y - slope * points[currentIndex].x;
@@ -19,7 +17,7 @@ namespace profile
 
     std::variant<size_t, double> Dynamics::find_current_segment(double input) const
     {
-        if (auto v = points.front(); points.size() == 1 || v.x >= input)
+        if (auto v = points.front(); points.size() == 1 || points.front().x >= input)
             return v.y;
         else if (v = points.back(); v.x <= input)
             return v.y;

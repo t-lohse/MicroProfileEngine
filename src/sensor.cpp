@@ -1,8 +1,9 @@
 //
 // Created by lohse on 11/28/24.
 //
+#include <iostream>
+
 #include "sensor.hpp"
-#include "iostream"
 
 // DummySensorState
 double DummySensorState::pistonPosition() const { return *_pistonPosition; }
