@@ -79,7 +79,7 @@ class ProfileEngineRunning
         saveStageLog(stageStartTime);
         currentStageId = targetStage;
 
-        if (profile->getStages().contains(currentStageId)) {
+        if (profile->getStages().size() > currentStageId) {
             stageStartTime = std::chrono::system_clock::now();
             return PS::Brewing;
         } else {
@@ -174,7 +174,7 @@ public:
                 state = PS::Ready;
             break;
         case PS::Ready:
-            currentStageId = 1;
+            currentStageId = 0;
             if (!profile->shouldWaitAfterHeating())
                 state = PS::Retracting;
             break;

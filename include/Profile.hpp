@@ -5,6 +5,8 @@
 #ifndef MICROPROFILEENGINE_PROFILE_HPP
 #define MICROPROFILEENGINE_PROFILE_HPP
 
+#include <vector>
+#include <map>
 #include <unordered_map>
 
 #include "types.hpp"
@@ -12,19 +14,18 @@
 
 namespace profile
 {
-    static std::expected<std::unordered_map<uint8_t, Stage>, ProfileError> fromJsonStages(ArduinoJson::JsonArray&);
+    static std::expected<std::vector<Stage>, ProfileError> fromJsonStages(ArduinoJson::JsonArray&);
 
     class Profile
     {
         temperature_t startingTemp;
         weight_t targetWeight;
         bool waiting_after_heating, autoPurge;
-        std::unordered_map<uint8_t, Stage> stages;
-        std::unordered_map<uint8_t, StageLog> stageLogs;
+        std::vector<Stage> stages;
+        std::vector<StageLog> stageLogs;
 
         explicit Profile(temperature_t startingTemp, weight_t targetWeight, bool waiting_after_heating, bool autoPurge,
-                         std::unordered_map<uint8_t, Stage>&& stages,
-                         std::unordered_map<uint8_t, StageLog>&& stageLogs):
+                         std::vector<Stage>&& stages, std::vector<StageLog>&& stageLogs):
             startingTemp(startingTemp), targetWeight(targetWeight), waiting_after_heating(waiting_after_heating),
             autoPurge(autoPurge), stages(std::move(stages)), stageLogs(std::move(stageLogs))
         {}
@@ -34,10 +35,10 @@ namespace profile
         weight_t getTargetWeight() const;
         bool shouldWaitAfterHeating() const;
         bool shouldAutoPurge() const;
-        const std::unordered_map<uint8_t, Stage>& getStages() const;
+        const std::vector<Stage>& getStages() const;
 
-        [[maybe_unused]] const std::unordered_map<uint8_t, StageLog>& getStageLogs() const;
-        std::unordered_map<uint8_t, StageLog>& getStageLogs();
+        [[maybe_unused]] const std::vector<StageLog>& getStageLogs() const;
+        std::vector<StageLog>& getStageLogs();
 
         static std::expected<Profile, ProfileError> fromJson(ArduinoJson::JsonDocument& obj)
         {
@@ -60,10 +61,7 @@ namespace profile
             if (!stag)
                 return std::unexpected(stag.error());
             auto stages = std::move(stag).value();
-            std::unordered_map<uint8_t, StageLog> logs{stages.size()};
-            for (const auto& v : stages) {
-                logs.insert({v.first, StageLog()});
-            }
+            std::vector<StageLog> logs{stages.size(), StageLog()};
 
             bool wait = obj["wait_after_heating"] | false;
             bool autoPurge = obj["auto_purge"] | false;
@@ -72,7 +70,7 @@ namespace profile
         }
     };
 
-    static std::expected<std::unordered_map<uint8_t, Stage>, ProfileError> fromJsonStages(ArduinoJson::JsonArray& vals)
+    static std::expected<std::vector<Stage>, ProfileError> fromJsonStages(ArduinoJson::JsonArray& vals)
     {
         if (!vals)
             return std::unexpected(ProfileError::noName("stages"));
@@ -91,7 +89,7 @@ namespace profile
 
             names.insert({name, i++});
         }
-        std::unordered_map<uint8_t, Stage> out{names.size()};
+        std::map<uint8_t, Stage> map{};
         for (const JsonObject& v : vals) {
             auto name = v["name"].as<std::string>();
             auto ct = ControlType::fromJson(v);
@@ -114,7 +112,13 @@ namespace profile
             auto limits = Limit::fromJson(le).value_or(std::vector<Limit>{});
 
             auto k = names[name];
-            out.insert({k, Stage(ctrl, std::move(dyn), ext, limits)});
+            map.insert({k, Stage(ctrl, std::move(dyn), ext, limits)});
+        }
+        std::vector<Stage> out{};
+        out.reserve(map.size());
+        std::vector<int> key, value;
+        for (auto& v : map) {
+            out.emplace_back(std::move(v.second));
         }
         return out;
     }

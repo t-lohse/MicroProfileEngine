@@ -10,8 +10,8 @@ namespace profile
     weight_t Profile::getTargetWeight() const { return targetWeight; }
     bool Profile::shouldWaitAfterHeating() const { return waiting_after_heating; }
     bool Profile::shouldAutoPurge() const { return autoPurge; }
-    const std::unordered_map<uint8_t, Stage>& Profile::getStages() const { return stages; }
+    const std::vector<Stage>& Profile::getStages() const { return stages; }
 
-    [[maybe_unused]] const std::unordered_map<uint8_t, StageLog>& Profile::getStageLogs() const { return stageLogs; }
-    std::unordered_map<uint8_t, StageLog>& Profile::getStageLogs() { return stageLogs; }
+    [[maybe_unused]] const std::vector<StageLog>& Profile::getStageLogs() const { return stageLogs; }
+    std::vector<StageLog>& Profile::getStageLogs() { return stageLogs; }
 }  // namespace profile

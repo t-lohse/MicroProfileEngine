@@ -5,9 +5,9 @@ namespace profile
 
     static constexpr uint32_t pow2(uint32_t exponent)
     {
-        uint32_t operand = 2;
-        while (exponent-- > 0)
-            operand *= operand;
+        uint32_t operand = 1;
+        for (; exponent > 0; exponent--)
+            operand *= 2;
 
         return operand;
     }
@@ -39,8 +39,8 @@ namespace profile
     }
     std::optional<uint8_t> ExitTrigger::targetStage() const
     {
-        auto v = ((_value >> TARGET_OFFSET)) & (pow2(UINT8_WIDTH) - 1);
-        return v > 0 ? std::optional<uint8_t>{} : v;
+        auto v = (_value >> TARGET_OFFSET) & (pow2(UINT8_WIDTH) - 1);
+        return v == 0 ? std::optional<uint8_t>{} : v - 1;
     }
     uint32_t ExitTrigger::value() const { return ((_value >> VALUE_OFFSET)) & (pow2(UINT32_WIDTH) - 1); }
 
