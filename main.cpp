@@ -1,12 +1,12 @@
-#include "ProfileDefinition.h"
-#include "SimplifiedProfileEngine.h"
-#include "ProfileGenerator.h"
-
-#include <chrono>
 #include <thread>
-#include <algorithm>
+#include <iostream>
 
-const char* profileJson = R"JSON({
+#include "Dynamics.hpp"
+#include "Profile.hpp"
+#include "sensor.hpp"
+#include "engine.hpp"
+
+const char* const profileJson = R"JSON({
     "name": "E61 with dropping pressure",
     "id": "4cdc0015-07cd-4738-b198-c7d8742acd2b",
     "author": "Carlos",
@@ -77,80 +77,48 @@ const char* profileJson = R"JSON({
     ]
 })JSON";
 
-
-int main(void)
+int main()
 {
+    JsonDocument doc;
+    deserializeJson(doc, profileJson);
 
-    // Profile maxProfile;
-    // maxProfile.stages_len = 2;
-    // maxProfile.temperature = writeProfileTemperature(88.4);
-    // Stage* stage = &maxProfile.stages[0];
-    // stage->dynamics.controlSelect = ControlType::CONTROL_PRESSURE;
-    // stage->dynamics.inputSelect = InputType::INPUT_TIME;
-    // stage->dynamics.interpolation = InterpolationType::INTERPOLATION_LINEAR;
-    // stage->dynamics.points_len = 3;
-    // Point *p1 = &stage->dynamics.points[0];
-    // Point *p2 = &stage->dynamics.points[1];
-    // Point *p3 = &stage->dynamics.points[2];
+    auto profile = profile::Profile::fromJson(doc).value();
 
-    // p1->x = 0.1 * 10;
-    // p1->y.pressure = writeProfilePressure(4.0);
-    // p2->x = 0.5 * 10;
-    // p2->y.pressure = writeProfilePressure(1.0);
-    // p3->x = 4.1 * 10;
-    // p3->y.pressure = writeProfilePressure(7.0);
+    auto driver = Driver<DummySensorState>();
 
+    auto pistonPos = driver.getSensorState()._pistonPosition;
+    auto engineIdle = ProfileEngineIdle(std::move(driver), &profile);
+    std::cout << "Starting engine" << std::endl;
+    auto engine = std::move(engineIdle).start();
+    std::cout << "The engine is in state: " << engine.getState() << std::endl;
 
-    // stage->exitTrigger_len = 1;
-    // ExitTrigger *trigger = &stage->exitTrigger[0];
-    // trigger->comparison = ExitComparison::EXIT_COMP_GREATER;
-    // trigger->type = ExitType::EXIT_TIME;
-    // trigger->target_stage = 1;
-    // trigger->value = writeExitValue(5.0);
-
-    // // Create stage 2
-    // stage = &maxProfile.stages[1];
-    // stage->dynamics.controlSelect = ControlType::CONTROL_PRESSURE;
-    // stage->dynamics.inputSelect = InputType::INPUT_TIME;
-    // stage->dynamics.interpolation = InterpolationType::INTERPOLATION_LINEAR;
-    // stage->dynamics.points_len = 1;
-    // p1 = &stage->dynamics.points[0];
-    // p1->x = 0.5 * 10;
-    // p1->y.pressure = writeProfilePressure(8.0);
-    // stage->exitTrigger_len = 1;
-    // trigger = &stage->exitTrigger[0];
-    // trigger->comparison = ExitComparison::EXIT_COMP_GREATER;
-    // trigger->type = ExitType::EXIT_TIME;
-    // trigger->target_stage = 1;
-    // trigger->value = writeExitValue(2.0);
-
-    ProfileGenerator generator(profileJson);
-    Profile maxProfile = generator.profile;
-
-
-    Driver driver;
-    SimplifiedProfileEngine engine(&maxProfile, &driver);
-    printf("After creating the engine is in state: %d\n", (short)engine.state);
-
-    try
-    {
-        engine.step();
-        printf("After one step without starting the engine is in state: %d\n", (short)engine.state);
-        printf("Starting engine\n");
-        engine.start();
-        printf("The engine is in state: %d\n",(short) engine.state);
-        while (engine.state != ProfileState::DONE) {
-            engine.step();
-            std::this_thread::sleep_for(std::chrono::milliseconds(50));
-            // We fake the piston moving 1% each step to show the piston position samping capabilities
-            if (engine.state == ProfileState::BREWING)
-                driver.sensors.piston_position = std::min<double>(driver.sensors.piston_position + 1, 100.0);
+    while (engine.getState() != ProfileState::Done) {
+        auto newEng = std::move(engine).step();
+        bool dip = false;
+        switch (newEng) {
+            using T = EngineStepResult<DummySensorState>;
+            case T::Next:
+                engine = std::move(newEng).getNext();
+                break;
+            case T::Finished:
+                dip = true;
+                break;
+            case T::Error:
+                std::cout << "No stages in profile!!! Error: `" << std::move(newEng).getError() << "`" << std::endl;
+                return 1;
         }
-        printf("Profile execution finished.\n");
-        printf("Profile allocated 0x%02lX bytes(%ld kB) of ram for all %d stages combined\n", generator.memoryUsed, generator.memoryUsed / 1024, maxProfile.stages_len);
+        if (dip)
+            break;
+
+        const long SLEEP_TIME = 50;
+        std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_TIME));
+        std::cout << "The engine is in state: " << engine.getState() << std::endl;
+
+        if (engine.getState() == ProfileState::Brewing) {
+            const double PISTON_CAP = 100;
+            *pistonPos = std::min<double>(*pistonPos + 1, PISTON_CAP);
+            std::cout << "Piston: " << *pistonPos << std::endl;
+        }
     }
-    catch (const NoStagesInProfileException *&e)
-    {
-        printf("No Stages in profile!!!");
-    }
+    std::cout << "Profile execution finished." << std::endl;
 }
