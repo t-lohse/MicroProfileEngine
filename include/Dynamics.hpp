@@ -257,7 +257,7 @@ namespace profile
 
         std::variant<size_t, double> find_current_segment(double input) const;
         //        SegmentIndexOrValue find_current_segment(double input);
-        explicit Dynamics(std::vector<Point> points, std::unique_ptr<InterpolationAlgorithm>&& interpolation,
+        explicit Dynamics(const std::vector<Point> points, std::unique_ptr<InterpolationAlgorithm>&& interpolation,
                           InputType inputSelect):
             points(points), interpolation(std::move(interpolation)), inputSelect(inputSelect)
         {}

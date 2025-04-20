@@ -33,5 +33,6 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     target_compile_options(MicroProfileEngine PRIVATE -Xclang
                            -clear-ast-before-backend
                             -fplugin=${SafetyAnalysisPlugin}
+                           "-fplugin-arg-safety_analysis-ignore-namespaces=gsl\;ArduinoJson"
                            -fplugin-arg-ptr_analysis-smart-ptr-factory=make_unique)
 endif()
