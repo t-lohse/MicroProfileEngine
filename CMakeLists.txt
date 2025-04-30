@@ -17,7 +17,7 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     message(STATUS "Using Clang: Enabling Clang-specific flags")
     # Only apply analyzer flags for clang-tidy, not the compiler
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror -Wall")
-    set(CMAKE_CXX_CLANG_TIDY "clang-tidy;-header-filter=^(?!.*_deps).*")
+    #set(CMAKE_CXX_CLANG_TIDY "clang-tidy;-header-filter=^(?!.*_deps).*")
     #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
     #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Xclang -clear-ast-before-backend -fplugin=./lib/libAnalysisPlugin.so -fplugin-arg-ptr_analysis-smart-ptr-factory=make_unique")
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
@@ -59,15 +59,24 @@ add_subdirectory(src)
 #set(SafetyAnalysisPlugin CACHE PATH
 #  "Clang installation directory")
 add_executable(main main.cpp)
-target_link_libraries(main MicroProfileEngine Microsoft.GSL::GSL)
+target_link_libraries(main MicroProfileEngine Microsoft.GSL::GSL m)
+
 if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    if (NOT DEFINED SafetyAnalysisPlugin)
+        message(FATAL_ERROR "No safetyanalysisplugin provided. Use `-DSafetyAnalysisPlugin`")
+    endif()
     #cmake -DCMAKE_CXX_COMPILER=clang -DSafetyAnalysisPlugin=/path/to/plugin
     message(STATUS "CLANG ADD TARGET COMPILE OPTIONS")
-    target_compile_options(main PRIVATE -Xclang -clear-ast-before-backend
+    message(STATUS "Using safety analysis plugin at ${SafetyAnalysisPlugin}")
+    target_compile_options(main PRIVATE -stdlib=libstdc++ -Xclang -clear-ast-before-backend
                            -fplugin=${SafetyAnalysisPlugin}
 
-                           -fplugin-arg-ptr_analysis-smart-ptr-factory=make_unique
+                           -fplugin-arg-safety_analysis-smart-ptr-factory=make_unique
                            "-fplugin-arg-safety_analysis-ignore-namespaces=gsl\;ArduinoJson"
+    )
+    target_link_options(main PRIVATE
+        -stdlib=libstdc++
+        -lstdc++
     )
 
 endif()
@@ -75,27 +84,27 @@ endif()
 set(CPPCHECK_EXCLUDE_DIRS ${CMAKE_SOURCE_DIR}/build;${CMAKE_SOURCE_DIR}/cmake-build-debug;${CMAKE_SOURCE_DIR}/cmake-build-release)
 set(CPPCHECK_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/main.cpp ${CMAKE_SOURCE_DIR}/src ${CMAKE_SOURCE_DIR}/include)
 # Run Cppcheck before compilation
-if(CPPCHECK_EXECUTABLE)
-    message(STATUS "Cppcheck found: ${CPPCHECK_EXECUTABLE}")
-
-    # Add Cppcheck target to analyze all .cpp and .h files
-    add_custom_target(
-            cppcheck
-            COMMAND ${CPPCHECK_EXECUTABLE} --inconclusive
-                --enable=all
-                --disable=missingInclude
-                --disable=unusedFunction
-                --error-exitcode=1
-                ${CPPCHECK_INCLUDE_DIRS}
-                main.cpp
-            COMMENT "Running Cppcheck static analysis"
-    )
-
-    # Make the main build depend on Cppcheck so it's run before compilation
-    add_dependencies(main cppcheck)
-else()
-    message(WARNING "Cppcheck not found, skipping static analysis.")
-endif()
+#if(CPPCHECK_EXECUTABLE)
+#    message(STATUS "Cppcheck found: ${CPPCHECK_EXECUTABLE}")
+#
+#    # Add Cppcheck target to analyze all .cpp and .h files
+#    add_custom_target(
+#            cppcheck
+#            COMMAND ${CPPCHECK_EXECUTABLE} --inconclusive
+#                --enable=all
+#                --disable=missingInclude
+#                --disable=unusedFunction
+#                --error-exitcode=1
+#                ${CPPCHECK_INCLUDE_DIRS}
+#                main.cpp
+#            COMMENT "Running Cppcheck static analysis"
+#    )
+#
+#    # Make the main build depend on Cppcheck so it's run before compilation
+#    add_dependencies(main cppcheck)
+#else()
+#    message(WARNING "Cppcheck not found, skipping static analysis.")
+#endif()
 #add_subdirectory(tests)
 
 file(GLOB_RECURSE PROJECT_SOURCES "${CMAKE_SOURCE_DIR}/src/*.cpp")

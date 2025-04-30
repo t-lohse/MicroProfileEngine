@@ -27,12 +27,20 @@ add_library(MicroProfileEngine STATIC ${SRC_FILES})
 
 # Link any required libraries (like ArduinoJson)
 
-target_link_libraries(MicroProfileEngine ArduinoJson)
+target_link_libraries(MicroProfileEngine ArduinoJson m)
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    target_compile_options(MicroProfileEngine PRIVATE -Xclang
+    if (NOT DEFINED SafetyAnalysisPlugin)
+        message(FATAL_ERROR "No safetyanalysisplugin provided. Use `-DSafetyAnalysisPlugin`")
+    endif()
+    message(STATUS "Using safety analysis plugin at ${SafetyAnalysisPlugin}")
+    target_compile_options(MicroProfileEngine PRIVATE -stdlib=libstdc++ -Xclang
                            -clear-ast-before-backend
                             -fplugin=${SafetyAnalysisPlugin}
                            "-fplugin-arg-safety_analysis-ignore-namespaces=gsl\;ArduinoJson"
-                           -fplugin-arg-ptr_analysis-smart-ptr-factory=make_unique)
+                           -fplugin-arg-safety_analysis-smart-ptr-factory=make_unique)
+    target_link_options(MicroProfileEngine PRIVATE
+        -stdlib=libstdc++
+        -lstdc++
+    )
 endif()
