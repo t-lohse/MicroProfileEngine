@@ -7,6 +7,7 @@
 
 #include <cstdint>
 #include <array>
+#include <memory>
 #include <variant>
 #include <gsl/gsl>
 #include <iostream>
@@ -182,7 +183,8 @@ namespace profile
         auto typ = ev.as<std::string>();
 
         if (typ == "linear") {
-            return std::unique_ptr<InterpolationAlgorithm>(new LinearInterpolation());
+            return std::make_unique<LinearInterpolation>();  // std::unique_ptr<InterpolationAlgorithm>(new
+                                                             // LinearInterpolation());
         }
         return std::unexpected(ProfileError::typeError("only `linear` interpolation supported"));
     }

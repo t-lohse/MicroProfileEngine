@@ -79,7 +79,8 @@ public:
 
 struct DummySensorState
 {
-    gsl::not_null<std::shared_ptr<double>> _pistonPosition = std::shared_ptr<double>(new double{0});
+    gsl::not_null<std::shared_ptr<double>> _pistonPosition =
+        std::make_shared<double>(0);  // std::shared_ptr<double>(new double{0});
     double _pistonSpeed;
     double _waterTemperature;
     double _cylinderTemperature;
