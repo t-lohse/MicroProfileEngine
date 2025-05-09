@@ -71,7 +71,7 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     target_compile_options(main PRIVATE -stdlib=libstdc++ -Xclang -clear-ast-before-backend
                            -fplugin=${SafetyAnalysisPlugin}
 
-                           -fplugin-arg-safety_analysis-smart-ptr-factory=make_unique
+                           #-fplugin-arg-safety_analysis-smart-ptr-factory=make_unique
                            "-fplugin-arg-safety_analysis-ignore-namespaces=gsl\;ArduinoJson"
     )
     target_link_options(main PRIVATE
