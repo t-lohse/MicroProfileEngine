@@ -95,7 +95,16 @@ int main()
     while (engine.getState() != ProfileState::Done) {
         auto newEng = std::move(engine).step();
         using T = EngineStepResult<DummySensorState>;
+        if (newEng == T::Finished) {
+            break;
+        } else if (newEng == T::Error) {
+            std::cout << "No stages in profile!!! Error: `" << std::move(newEng).getError() << "`" << std::endl;
+            return 1;
+            break;
+        }
+        engine = std::move(newEng).getNext();
 
+        /*
         if (newEng == T::Next) {
             engine = std::move(newEng).getNext();
         } else if (newEng == T::Finished) {
@@ -105,6 +114,7 @@ int main()
             return 1;
             break;
         }
+        */
 
         /*
         bool dip = false;
