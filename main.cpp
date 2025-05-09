@@ -94,21 +94,30 @@ int main()
 
     while (engine.getState() != ProfileState::Done) {
         auto newEng = std::move(engine).step();
+        using T = EngineStepResult<DummySensorState>;
+
+        if (newEng == T::Next) {
+            engine = std::move(newEng).getNext();
+        } else if (newEng == T::Finished) {
+            break;
+        } else if (newEng == T::Error) {
+            std::cout << "No stages in profile!!! Error: `" << std::move(newEng).getError() << "`" << std::endl;
+            return 1;
+            break;
+        }
+
+        /*
         bool dip = false;
         switch (newEng) {
-            using T = EngineStepResult<DummySensorState>;
-            case T::Next:
-                engine = std::move(newEng).getNext();
-                break;
-            case T::Finished:
-                dip = true;
-                break;
-            case T::Error:
-                std::cout << "No stages in profile!!! Error: `" << std::move(newEng).getError() << "`" << std::endl;
-                return 1;
+        case T::Next: engine = std::move(newEng).getNext(); break;
+        case T::Finished: dip = true; break;
+        case T::Error:
+            std::cout << "No stages in profile!!! Error: `" << std::move(newEng).getError() << "`" << std::endl;
+            return 1;
         }
         if (dip)
             break;
+        */
 
         const long SLEEP_TIME = 50;
         std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_TIME));
