@@ -1,7 +1,6 @@
 //
 // Created by lohse on 11/28/24.
 //
-
 #include "Stage.hpp"
 
 namespace profile
@@ -43,15 +42,7 @@ namespace profile
     // StageLog
     bool StageLog::isValid() const { return entry.has_value(); }
 
-    [[maybe_unused]] std::optional<gsl::not_null<const StageVariables*>> StageLog::getEntry() const
-    {
-        return entry.transform([](auto& v) { return gsl::not_null{&v}; });
-    }
 
-    [[maybe_unused]] std::optional<gsl::not_null<StageVariables*>> StageLog::getEntry()
-    {
-        return entry.transform([](auto& v) { return gsl::not_null{&v}; });
-    }
     std::optional<StageVariables> StageLog::putEntry(StageVariables s)
     {
         auto old = entry;
@@ -59,15 +50,7 @@ namespace profile
         return old;
     }
 
-    [[maybe_unused]] std::optional<gsl::not_null<const StageVariables*>> StageLog::getExit() const
-    {
-        return exit.transform([](auto& v) { return gsl::not_null{&v}; });
-    }
 
-    std::optional<gsl::not_null<StageVariables*>> StageLog::getExit()
-    {
-        return exit.transform([](auto& v) { return gsl::not_null{&v}; });
-    }
     std::optional<StageVariables> StageLog::putExit(StageVariables s)
     {
         auto old = exit;

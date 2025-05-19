@@ -8,6 +8,7 @@
 #include <expected>
 #include <iostream>
 #include <vector>
+#include <unordered_map>
 
 #include "types.hpp"
 #include "sensor.hpp"

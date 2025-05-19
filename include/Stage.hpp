@@ -57,13 +57,9 @@ namespace profile
         explicit StageLog() = default;
         bool isValid() const;
 
-        [[maybe_unused]] std::optional<gsl::not_null<const StageVariables*>> getEntry() const;
 
-        [[maybe_unused]] std::optional<gsl::not_null<StageVariables*>> getEntry();
         std::optional<StageVariables> putEntry(StageVariables s);
 
-        [[maybe_unused]] std::optional<gsl::not_null<const StageVariables*>> getExit() const;
-        [[maybe_unused]] std::optional<gsl::not_null<StageVariables*>> getExit();
         std::optional<StageVariables> putExit(StageVariables s);
     };
 }  // namespace profile

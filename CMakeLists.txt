@@ -31,15 +31,15 @@ endif()
 
 include(FetchContent)
 
-FetchContent_Declare(GSL
-        GIT_REPOSITORY "https://github.com/microsoft/GSL"
-        GIT_TAG "v4.1.0"
-        GIT_SHALLOW ON
-)
+#FetchContent_Declare(GSL
+#        GIT_REPOSITORY "https://github.com/microsoft/GSL"
+#        GIT_TAG "v4.1.0"
+#        GIT_SHALLOW ON
+#)
 
-FetchContent_MakeAvailable(GSL)
+#FetchContent_MakeAvailable(GSL)
 
-include_directories(${GSL_SOURCE_DIR}/include)
+#include_directories(${GSL_SOURCE_DIR}/include)
 
 include(sanitizers.cmake)
 #include(doctest.cmake)
@@ -59,7 +59,8 @@ add_subdirectory(src)
 #set(SafetyAnalysisPlugin CACHE PATH
 #  "Clang installation directory")
 add_executable(main main.cpp)
-target_link_libraries(main MicroProfileEngine Microsoft.GSL::GSL m)
+#target_link_libraries(main MicroProfileEngine Microsoft.GSL::GSL m)
+target_link_libraries(main MicroProfileEngine m)
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     if (NOT DEFINED SafetyAnalysisPlugin)
@@ -72,7 +73,7 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
                            -fplugin=${SafetyAnalysisPlugin}
 
                            #-fplugin-arg-safety_analysis-smart-ptr-factory=make_unique
-                           "-fplugin-arg-safety_analysis-ignore-namespaces=gsl\;ArduinoJson"
+                           "-fplugin-arg-safety_analysis-ignore-namespaces=ArduinoJson"
     )
     target_link_options(main PRIVATE
         -stdlib=libstdc++
@@ -118,7 +119,7 @@ add_custom_command(
         -I${CMAKE_SOURCE_DIR}/include
         -I/usr/lib/clang/18/include
         -I/usr/include/c++/14.2.1
-        -I${GSL_SOURCE_DIR}/include
+        #-I${GSL_SOURCE_DIR}/include
         -I${ArduinoJson_SOURCE_DIR}/src
         ../main.cpp
         -o ${COMBINED_FILE}
@@ -126,7 +127,7 @@ add_custom_command(
         COMMENT "Generating a combined source file: ${COMBINED_FILE}"
 )
 message("${ArduinoJson_SOURCE_DIR}")
-message("${GSL_SOURCE_DIR}")
+#message("${GSL_SOURCE_DIR}")
 add_custom_target(GenerateCombinedSources ALL
         DEPENDS ${COMBINED_FILE}
 )

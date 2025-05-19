@@ -87,7 +87,7 @@ int main()
     auto driver = Driver<DummySensorState>();
 
     auto pistonPos = driver.getSensorState()._pistonPosition;
-    auto engineIdle = ProfileEngineIdle(std::move(driver), &profile);
+    auto engineIdle = ProfileEngineIdle(std::move(driver), std::make_unique<profile::Profile>(std::move(profile)));
     std::cout << "Starting engine" << std::endl;
     auto engine = std::move(engineIdle).start();
     std::cout << "The engine is in state: " << engine.getState() << std::endl;

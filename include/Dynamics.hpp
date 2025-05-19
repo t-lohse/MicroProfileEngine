@@ -9,8 +9,9 @@
 #include <array>
 #include <memory>
 #include <variant>
-#include <gsl/gsl>
+//#include <gsl/gsl>
 #include <iostream>
+#include <vector>
 
 #include "types.hpp"
 #include "ArduinoJson.h"
