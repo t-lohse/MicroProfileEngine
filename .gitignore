@@ -3,6 +3,7 @@
 engine
 .idea
 .vscode
+.cache
 
 build
 cmake-build-debug

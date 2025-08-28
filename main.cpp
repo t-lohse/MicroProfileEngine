@@ -87,28 +87,47 @@ int main()
     auto driver = Driver<DummySensorState>();
 
     auto pistonPos = driver.getSensorState()._pistonPosition;
-    auto engineIdle = ProfileEngineIdle(std::move(driver), &profile);
+    auto engineIdle = ProfileEngineIdle(std::move(driver), std::make_unique<profile::Profile>(std::move(profile)));
     std::cout << "Starting engine" << std::endl;
     auto engine = std::move(engineIdle).start();
     std::cout << "The engine is in state: " << engine.getState() << std::endl;
 
     while (engine.getState() != ProfileState::Done) {
         auto newEng = std::move(engine).step();
+        using T = EngineStepResult<DummySensorState>;
+        if (newEng == T::Finished) {
+            break;
+        } else if (newEng == T::Error) {
+            std::cout << "No stages in profile!!! Error: `" << std::move(newEng).getError() << "`" << std::endl;
+            return 1;
+            break;
+        }
+        engine = std::move(newEng).getNext();
+
+        /*
+        if (newEng == T::Next) {
+            engine = std::move(newEng).getNext();
+        } else if (newEng == T::Finished) {
+            break;
+        } else if (newEng == T::Error) {
+            std::cout << "No stages in profile!!! Error: `" << std::move(newEng).getError() << "`" << std::endl;
+            return 1;
+            break;
+        }
+        */
+
+        /*
         bool dip = false;
         switch (newEng) {
-            using T = EngineStepResult<DummySensorState>;
-            case T::Next:
-                engine = std::move(newEng).getNext();
-                break;
-            case T::Finished:
-                dip = true;
-                break;
-            case T::Error:
-                std::cout << "No stages in profile!!! Error: `" << std::move(newEng).getError() << "`" << std::endl;
-                return 1;
+        case T::Next: engine = std::move(newEng).getNext(); break;
+        case T::Finished: dip = true; break;
+        case T::Error:
+            std::cout << "No stages in profile!!! Error: `" << std::move(newEng).getError() << "`" << std::endl;
+            return 1;
         }
         if (dip)
             break;
+        */
 
         const long SLEEP_TIME = 50;
         std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_TIME));

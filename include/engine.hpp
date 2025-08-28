@@ -40,17 +40,16 @@ class ProfileEngineIdle;
 template <SensorState T>
 class EngineStepResult;
 
-template <SensorState T>
-class ProfileEngineRunning
+template <SensorState T> class ProfileEngineRunning
 {
     Driver<T> driver;
-    gsl::not_null<profile::Profile*> profile;
+    std::unique_ptr<profile::Profile> profile;
 
     std::chrono::time_point<std::chrono::system_clock> profileStartTime, stageStartTime;
     ProfileState state;
     uint8_t currentStageId;
-    ProfileEngineRunning(Driver<T>&& driver, gsl::not_null<profile::Profile*> profile):
-        driver{std::move(driver)}, profile(profile), profileStartTime{std::chrono::system_clock::now()},
+    ProfileEngineRunning(Driver<T>&& driver, decltype(profile) profile):
+        driver{std::move(driver)}, profile(std::move(profile)), profileStartTime{std::chrono::system_clock::now()},
         stageStartTime(std::chrono::system_clock::now()), state{ProfileState::Heating}, currentStageId{1}
     {}
 
@@ -114,17 +113,17 @@ class ProfileEngineRunning
             }
         }
 
-        auto stageDyn = gsl::not_null(&stage.getDynamics());
+        auto &stageDyn = stage.getDynamics();
 
         double inputRefVal = NAN;  // = std::numeric_limits<double>::min();
-        switch (stageDyn->inputType()) {
+        switch (stageDyn.inputType()) {
             using IT = profile::InputType;
         case IT::Time: inputRefVal = elapsed.count(); break;
         case IT::PistonPosition: inputRefVal = driver.getSensorState().pistonPosition(); break;
         case IT::Weight: inputRefVal = driver.getSensorState().weight(); break;
         }
 
-        auto sampledOutput = stageDyn->runInterpolation(inputRefVal);
+        auto sampledOutput = stageDyn.runInterpolation(inputRefVal);
         const double SEC_TO_MILLIS = 1000.0;
         std::cout << "sampled (" << inputRefVal << ") (" << sampledOutput << ")" << std::endl;
         std::cout << "Setting output at " << elapsed.count() * SEC_TO_MILLIS << " ms to " << sampledOutput << std::endl;
@@ -202,7 +201,7 @@ public:
         case PS::Purging:
             driver.setTargetPistonPosition(100.0);
             if (driver.getSensorState().pistonPosition() >= PISTON_UPPER_BOUND) {
-                return EngineStepResult<T>(ProfileEngineIdle<T>(std::move(driver), profile));
+                return EngineStepResult<T>(ProfileEngineIdle<T>(std::move(driver), std::move(profile)));
             }
             break;
         }
@@ -216,7 +215,7 @@ template <SensorState T>
 class ProfileEngineIdle
 {
     Driver<T> driver;
-    gsl::not_null<profile::Profile*> profile;
+    std::unique_ptr<profile::Profile> profile;
 
     friend class ProfileEngineRunning<T>;
     friend class EngineStepResult<T>;
@@ -228,11 +227,11 @@ public:
     ProfileEngineIdle(ProfileEngineIdle&&) = default;
     ProfileEngineIdle& operator=(ProfileEngineIdle&&) = default;
     ~ProfileEngineIdle() = default;
-    ProfileEngineIdle(Driver<T>&& driver, gsl::not_null<profile::Profile*> profile):
-        driver{std::move(driver)}, profile(profile)
+    ProfileEngineIdle(Driver<T>&& driver, decltype(profile) profile):
+        driver{std::move(driver)}, profile(std::move(profile))
     {}
 
-    ProfileEngineRunning<T> start() && { return ProfileEngineRunning<T>(std::move(driver), profile); }
+    ProfileEngineRunning<T> start() && { return ProfileEngineRunning<T>(std::move(driver), std::move(profile)); }
 };
 
 template <SensorState T>
